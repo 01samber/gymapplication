@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     })
 
     const body = await req.json()
-    const { full_name, email, phone, date_of_birth, specialization, experience_years, bio } = body
+    const { full_name, email, phone, date_of_birth, specialization, specialization_ids, experience_years, bio } = body
 
     if (!email || !full_name) {
       return NextResponse.json(
@@ -73,22 +73,37 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const specializations = specialization
+    const specIds = Array.isArray(specialization_ids) ? specialization_ids : []
+    let specializations: string[] = specialization
       ? (specialization.includes(',') ? specialization.split(',').map((s: string) => s.trim()) : [specialization])
       : []
+    if (specIds.length > 0 && specializations.length === 0) {
+      const { data: specRows } = await adminClient.from('specializations').select('name').in('id', specIds)
+      specializations = (specRows || []).map((r) => r.name)
+    }
 
-    const { error: trainerError } = await adminClient.from('trainer_profiles').insert({
-      user_id: userId,
-      specializations: specializations.length > 0 ? specializations : [],
-      experience_years: parseInt(experience_years) || 0,
-      bio: bio || null,
-    })
+    const { data: trainerRow, error: trainerError } = await adminClient
+      .from('trainer_profiles')
+      .insert({
+        user_id: userId,
+        specializations: specializations.length > 0 ? specializations : [],
+        experience_years: parseInt(experience_years) || 0,
+        bio: bio || null,
+      })
+      .select('id')
+      .single()
 
     if (trainerError) {
       await adminClient.auth.admin.deleteUser(userId)
       return NextResponse.json(
         { error: trainerError.message },
         { status: 400 }
+      )
+    }
+
+    if (trainerRow && specIds.length > 0) {
+      await adminClient.from('trainer_profile_specializations').insert(
+        specIds.map((sid: string) => ({ trainer_profile_id: trainerRow.id, specialization_id: sid }))
       )
     }
 

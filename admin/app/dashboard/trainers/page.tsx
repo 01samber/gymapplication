@@ -346,6 +346,8 @@ function TrainerCard({ trainer, onEdit, onDelete }: {
   )
 }
 
+type Spec = { id: string; name: string }
+
 function TrainerFormModal({ trainer, onClose, onSuccess }: {
   trainer: Trainer | null
   onClose: () => void
@@ -354,15 +356,37 @@ function TrainerFormModal({ trainer, onClose, onSuccess }: {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [tempPassword, setTempPassword] = useState<string | null>(null)
+  const [specializations, setSpecializations] = useState<Spec[]>([])
+  const [selectedSpecIds, setSelectedSpecIds] = useState<string[]>([])
   const [form, setForm] = useState({
     full_name: trainer?.full_name || '',
     email: trainer?.email || '',
     phone: trainer?.phone || '',
     date_of_birth: (trainer?.date_of_birth || '').toString().split('T')[0] || '',
-    specialization: typeof trainer?.specialization === 'string' ? trainer.specialization : Array.isArray(trainer?.specialization) ? (trainer.specialization as string[]).join(', ') : '',
     experience_years: trainer?.experience_years || 0,
     bio: trainer?.bio || ''
   })
+
+  useEffect(() => {
+    async function load() {
+      const { data } = await supabase.from('specializations').select('id, name').order('display_order').order('name')
+      setSpecializations(data || [])
+      if (trainer?.id) {
+        const { data: links } = await supabase
+          .from('trainer_profile_specializations')
+          .select('specialization_id')
+          .eq('trainer_profile_id', trainer.id)
+        setSelectedSpecIds((links || []).map(l => l.specialization_id))
+      } else {
+        setSelectedSpecIds([])
+      }
+    }
+    load()
+  }, [trainer?.id])
+
+  function toggleSpec(id: string) {
+    setSelectedSpecIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -372,22 +396,24 @@ function TrainerFormModal({ trainer, onClose, onSuccess }: {
 
     try {
       if (trainer) {
-        const specializations = form.specialization
-          ? (form.specialization.includes(',') ? form.specialization.split(',').map(s => s.trim()) : [form.specialization])
-          : []
         await supabase
           .from('profiles')
           .update({ full_name: form.full_name, email: form.email, phone: form.phone, date_of_birth: form.date_of_birth || null })
           .eq('id', trainer.user_id)
 
-        await supabase
-          .from('trainer_profiles')
-          .update({ 
-            specializations: specializations.length > 0 ? specializations : [],
-            experience_years: form.experience_years,
-            bio: form.bio || null
-          })
-          .eq('id', trainer.id)
+        const specNames = specializations.filter(s => selectedSpecIds.includes(s.id)).map(s => s.name)
+        await supabase.from('trainer_profiles').update({
+          specializations: specNames,
+          experience_years: form.experience_years,
+          bio: form.bio || null
+        }).eq('id', trainer.id)
+
+        await supabase.from('trainer_profile_specializations').delete().eq('trainer_profile_id', trainer.id)
+        if (selectedSpecIds.length > 0) {
+          await supabase.from('trainer_profile_specializations').insert(
+            selectedSpecIds.map(sid => ({ trainer_profile_id: trainer.id, specialization_id: sid }))
+          )
+        }
         onSuccess()
       } else {
         const res = await fetch('/api/add-trainer', {
@@ -398,7 +424,7 @@ function TrainerFormModal({ trainer, onClose, onSuccess }: {
             email: form.email,
             phone: form.phone || undefined,
             date_of_birth: form.date_of_birth || undefined,
-            specialization: form.specialization || undefined,
+            specialization_ids: selectedSpecIds,
             experience_years: form.experience_years,
             bio: form.bio || undefined,
           }),
@@ -501,17 +527,27 @@ function TrainerFormModal({ trainer, onClose, onSuccess }: {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Specialization</label>
-              <input
-                type="text"
-                value={form.specialization}
-                onChange={(e) => setForm({ ...form, specialization: e.target.value })}
-                placeholder="e.g., Weight Training"
-                className="w-full px-4 py-3 glass-input border border-slate-600/50 rounded text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-              />
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Specializations (lookup)</label>
+            <div className="max-h-40 overflow-y-auto border border-slate-600/50 rounded-lg p-3 bg-black/20 space-y-2">
+              {specializations.length === 0 ? (
+                <p className="text-gray-500 text-sm">No specializations. Add them in <a href="/dashboard/specializations" className="text-primary hover:underline">Specializations</a>.</p>
+              ) : (
+                specializations.map(spec => (
+                  <label key={spec.id} className="flex items-center gap-2 cursor-pointer hover:bg-white/5 rounded px-2 py-1">
+                    <input
+                      type="checkbox"
+                      checked={selectedSpecIds.includes(spec.id)}
+                      onChange={() => toggleSpec(spec.id)}
+                      className="rounded border-slate-500 text-primary focus:ring-primary"
+                    />
+                    <span className="text-gray-300">{spec.name}</span>
+                  </label>
+                ))
+              )}
             </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">Years of Experience</label>
               <input

@@ -20,7 +20,8 @@ import {
   Dumbbell as ExerciseIcon,
   UserPlus,
   Apple,
-  Salad
+  Salad,
+  Tag
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -30,6 +31,7 @@ const navigation: { name: string; href: string; icon: any; highlight?: boolean }
   { name: 'Members', href: '/dashboard/members', icon: Users },
   { name: 'Trainers', href: '/dashboard/trainers', icon: UserCog },
   { name: 'Nutritionists', href: '/dashboard/nutritionists', icon: Salad },
+  { name: 'Specializations', href: '/dashboard/specializations', icon: Tag },
   { name: 'Client Nutrition', href: '/dashboard/clients', icon: Apple },
   { name: 'Bookings', href: '/dashboard/bookings', icon: Calendar },
   { name: 'Attendance', href: '/dashboard/attendance', icon: ClipboardCheck },

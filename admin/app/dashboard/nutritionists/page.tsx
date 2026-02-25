@@ -318,6 +318,8 @@ function NutritionistCard({ nutritionist, onEdit, onDelete }: {
   )
 }
 
+type Spec = { id: string; name: string }
+
 function NutritionistFormModal({ nutritionist, onClose, onSuccess }: {
   nutritionist: Nutritionist | null
   onClose: () => void
@@ -326,16 +328,38 @@ function NutritionistFormModal({ nutritionist, onClose, onSuccess }: {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [tempPassword, setTempPassword] = useState<string | null>(null)
+  const [specializations, setSpecializations] = useState<Spec[]>([])
+  const [selectedSpecIds, setSelectedSpecIds] = useState<string[]>([])
   const [form, setForm] = useState({
     full_name: nutritionist?.full_name || '',
     email: nutritionist?.email || '',
     phone: nutritionist?.phone || '',
     date_of_birth: (nutritionist?.date_of_birth || '').toString().split('T')[0] || '',
-    specializations: nutritionist?.specializations || '',
     certifications: '',
     experience_years: nutritionist?.experience_years || 0,
     bio: nutritionist?.bio || ''
   })
+
+  useEffect(() => {
+    async function load() {
+      const { data } = await supabase.from('specializations').select('id, name').order('display_order').order('name')
+      setSpecializations(data || [])
+      if (nutritionist?.id) {
+        const { data: links } = await supabase
+          .from('dietitian_profile_specializations')
+          .select('specialization_id')
+          .eq('dietitian_profile_id', nutritionist.id)
+        setSelectedSpecIds((links || []).map(l => l.specialization_id))
+      } else {
+        setSelectedSpecIds([])
+      }
+    }
+    load()
+  }, [nutritionist?.id])
+
+  function toggleSpec(id: string) {
+    setSelectedSpecIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -345,13 +369,20 @@ function NutritionistFormModal({ nutritionist, onClose, onSuccess }: {
 
     try {
       if (nutritionist) {
-        const spec = form.specializations ? (form.specializations.includes(',') ? form.specializations.split(',').map(s => s.trim()) : [form.specializations]) : []
         await supabase.from('profiles').update({ full_name: form.full_name, email: form.email, phone: form.phone, date_of_birth: form.date_of_birth || null }).eq('id', nutritionist.user_id)
+        const specNames = specializations.filter(s => selectedSpecIds.includes(s.id)).map(s => s.name)
         await supabase.from('dietitian_profiles').update({
-          specializations: spec,
+          specializations: specNames,
           experience_years: form.experience_years,
           bio: form.bio || null
         }).eq('id', nutritionist.id)
+
+        await supabase.from('dietitian_profile_specializations').delete().eq('dietitian_profile_id', nutritionist.id)
+        if (selectedSpecIds.length > 0) {
+          await supabase.from('dietitian_profile_specializations').insert(
+            selectedSpecIds.map(sid => ({ dietitian_profile_id: nutritionist.id, specialization_id: sid }))
+          )
+        }
         onSuccess()
       } else {
         const res = await fetch('/api/add-nutritionist', {
@@ -362,7 +393,7 @@ function NutritionistFormModal({ nutritionist, onClose, onSuccess }: {
             email: form.email,
             phone: form.phone || undefined,
             date_of_birth: form.date_of_birth || undefined,
-            specializations: form.specializations || undefined,
+            specialization_ids: selectedSpecIds,
             certifications: form.certifications || undefined,
             experience_years: form.experience_years,
             bio: form.bio || undefined,
@@ -430,8 +461,24 @@ function NutritionistFormModal({ nutritionist, onClose, onSuccess }: {
                 <input type="date" value={form.date_of_birth} onChange={(e) => setForm({ ...form, date_of_birth: e.target.value })} className="w-full px-4 py-3 glass-input rounded text-white [&::-webkit-calendar-picker-indicator]:opacity-70" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Specializations</label>
-                <input type="text" value={form.specializations} onChange={(e) => setForm({ ...form, specializations: e.target.value })} className="w-full px-4 py-3 glass-input rounded text-white" placeholder="e.g. Weight Loss, Sports Nutrition" />
+                <label className="block text-sm font-medium text-gray-300 mb-2">Specializations (lookup)</label>
+                <div className="max-h-40 overflow-y-auto border border-slate-600/50 rounded-lg p-3 bg-black/20 space-y-2">
+                  {specializations.length === 0 ? (
+                    <p className="text-gray-500 text-sm">No specializations. Add them in <a href="/dashboard/specializations" className="text-primary hover:underline">Specializations</a>.</p>
+                  ) : (
+                    specializations.map(spec => (
+                      <label key={spec.id} className="flex items-center gap-2 cursor-pointer hover:bg-white/5 rounded px-2 py-1">
+                        <input
+                          type="checkbox"
+                          checked={selectedSpecIds.includes(spec.id)}
+                          onChange={() => toggleSpec(spec.id)}
+                          className="rounded border-slate-500 text-primary focus:ring-primary"
+                        />
+                        <span className="text-gray-300">{spec.name}</span>
+                      </label>
+                    ))
+                  )}
+                </div>
               </div>
               {!nutritionist && (
                 <div>

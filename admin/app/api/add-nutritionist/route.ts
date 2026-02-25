@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     })
 
     const body = await req.json()
-    const { full_name, email, phone, date_of_birth, specializations, certifications, bio, experience_years } = body
+    const { full_name, email, phone, date_of_birth, specializations, specialization_ids, certifications, bio, experience_years } = body
 
     if (!email || !full_name) {
       return NextResponse.json(
@@ -73,30 +73,45 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const specArray = specializations
+    const specIds = Array.isArray(specialization_ids) ? specialization_ids : []
+    let specArray = specializations
       ? (typeof specializations === 'string' && specializations.includes(',')
           ? specializations.split(',').map((s: string) => s.trim())
           : [specializations])
       : []
+    if (specIds.length > 0 && specArray.length === 0) {
+      const { data: specRows } = await adminClient.from('specializations').select('name').in('id', specIds)
+      specArray = (specRows || []).map((r) => r.name)
+    }
     const certArray = certifications
       ? (typeof certifications === 'string' && certifications.includes(',')
           ? certifications.split(',').map((c: string) => c.trim())
           : [certifications])
       : []
 
-    const { error: dietitianError } = await adminClient.from('dietitian_profiles').insert({
-      user_id: userId,
-      specializations: specArray,
+    const { data: dietitianRow, error: dietitianError } = await adminClient
+      .from('dietitian_profiles')
+      .insert({
+        user_id: userId,
+        specializations: specArray,
       certifications: certArray,
       bio: bio || null,
       experience_years: parseInt(experience_years) || 0,
     })
+    .select('id')
+    .single()
 
     if (dietitianError) {
       await adminClient.auth.admin.deleteUser(userId)
       return NextResponse.json(
         { error: dietitianError.message },
         { status: 400 }
+      )
+    }
+
+    if (dietitianRow && specIds.length > 0) {
+      await adminClient.from('dietitian_profile_specializations').insert(
+        specIds.map((sid: string) => ({ dietitian_profile_id: dietitianRow.id, specialization_id: sid }))
       )
     }
 
