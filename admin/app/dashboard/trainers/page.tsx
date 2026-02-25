@@ -531,7 +531,7 @@ function TrainerFormModal({ trainer, onClose, onSuccess }: {
             <label className="block text-sm font-medium text-gray-300 mb-2">Specializations (lookup)</label>
             <div className="max-h-40 overflow-y-auto border border-slate-600/50 rounded-lg p-3 bg-black/20 space-y-2">
               {specializations.length === 0 ? (
-                <p className="text-gray-500 text-sm">No specializations. Add them in <a href="/dashboard/specializations" className="text-primary hover:underline">Specializations</a>.</p>
+                <p className="text-gray-500 text-sm">No specializations found in database.</p>
               ) : (
                 specializations.map(spec => (
                   <label key={spec.id} className="flex items-center gap-2 cursor-pointer hover:bg-white/5 rounded px-2 py-1">

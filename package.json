@@ -1,0 +1,12 @@
+{
+  "name": "gymapplication",
+  "private": true,
+  "devDependencies": {
+    "supabase": "^2.75.0"
+  },
+  "scripts": {
+    "supabase": "supabase",
+    "db:push": "supabase db push",
+    "db:link": "supabase link --project-ref jucjlxepcfhhlzieovmh"
+  }
+}

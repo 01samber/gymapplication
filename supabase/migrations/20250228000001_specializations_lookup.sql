@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS specializations (
 
 CREATE INDEX IF NOT EXISTS idx_specializations_display_order ON specializations(display_order);
 
--- Junction: trainers <-> specializations
+-- Junction: trainers <-> specializations (IF NOT EXISTS for idempotent re-runs)
 CREATE TABLE IF NOT EXISTS trainer_profile_specializations (
   trainer_profile_id UUID NOT NULL REFERENCES trainer_profiles(id) ON DELETE CASCADE,
   specialization_id UUID NOT NULL REFERENCES specializations(id) ON DELETE CASCADE,
@@ -48,7 +48,7 @@ INSERT INTO specializations (name, slug, display_order) VALUES
   ('General Fitness', 'general-fitness', 8),
   ('Clinical Nutrition', 'clinical-nutrition', 9),
   ('Weight Gain', 'weight-gain', 10)
-ON CONFLICT (name) DO NOTHING;
+ON CONFLICT DO NOTHING;
 
 -- Migrate existing trainer specializations (TEXT[]) to lookup
 DO $$
@@ -56,6 +56,7 @@ DECLARE
   rec RECORD;
   spec_name TEXT;
   spec_id UUID;
+  the_slug TEXT;
 BEGIN
   FOR rec IN
     SELECT tp.id, tp.specializations
@@ -66,12 +67,12 @@ BEGIN
     LOOP
       spec_name := TRIM(spec_name);
       IF spec_name <> '' THEN
-        -- Get or create specialization
-        SELECT id INTO spec_id FROM specializations WHERE LOWER(TRIM(name)) = LOWER(spec_name) LIMIT 1;
+        the_slug := lower(regexp_replace(spec_name, '\s+', '-', 'g'));
+        SELECT id INTO spec_id FROM specializations WHERE slug = the_slug OR LOWER(TRIM(name)) = LOWER(spec_name) LIMIT 1;
         IF spec_id IS NULL THEN
-          INSERT INTO specializations (name, slug) VALUES (spec_name, lower(regexp_replace(spec_name, '\s+', '-', 'g')))
-            ON CONFLICT (name) DO NOTHING;
-          SELECT id INTO spec_id FROM specializations WHERE LOWER(TRIM(name)) = LOWER(spec_name) LIMIT 1;
+          INSERT INTO specializations (name, slug) VALUES (spec_name, the_slug)
+            ON CONFLICT DO NOTHING;
+          SELECT id INTO spec_id FROM specializations WHERE slug = the_slug OR LOWER(TRIM(name)) = LOWER(spec_name) LIMIT 1;
         END IF;
         IF spec_id IS NOT NULL THEN
           INSERT INTO trainer_profile_specializations (trainer_profile_id, specialization_id)
@@ -90,6 +91,7 @@ DECLARE
   rec RECORD;
   spec_name TEXT;
   spec_id UUID;
+  the_slug TEXT;
 BEGIN
   FOR rec IN
     SELECT dp.id, dp.specializations
@@ -100,11 +102,12 @@ BEGIN
     LOOP
       spec_name := TRIM(spec_name);
       IF spec_name <> '' THEN
-        SELECT id INTO spec_id FROM specializations WHERE LOWER(TRIM(name)) = LOWER(spec_name) LIMIT 1;
+        the_slug := lower(regexp_replace(spec_name, '\s+', '-', 'g'));
+        SELECT id INTO spec_id FROM specializations WHERE slug = the_slug OR LOWER(TRIM(name)) = LOWER(spec_name) LIMIT 1;
         IF spec_id IS NULL THEN
-          INSERT INTO specializations (name, slug) VALUES (spec_name, lower(regexp_replace(spec_name, '\s+', '-', 'g')))
-            ON CONFLICT (name) DO NOTHING;
-          SELECT id INTO spec_id FROM specializations WHERE LOWER(TRIM(name)) = LOWER(spec_name) LIMIT 1;
+          INSERT INTO specializations (name, slug) VALUES (spec_name, the_slug)
+            ON CONFLICT DO NOTHING;
+          SELECT id INTO spec_id FROM specializations WHERE slug = the_slug OR LOWER(TRIM(name)) = LOWER(spec_name) LIMIT 1;
         END IF;
         IF spec_id IS NOT NULL THEN
           INSERT INTO dietitian_profile_specializations (dietitian_profile_id, specialization_id)
