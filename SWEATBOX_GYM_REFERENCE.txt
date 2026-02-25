@@ -1,0 +1,277 @@
+================================================================================
+                    SWEATBOX GYM - PROJECT REFERENCE GUIDE
+================================================================================
+Generated: February 2025
+Project: SweatBox Gym
+================================================================================
+
+
+SECTION 1: QUICK ACCESS (MASTER REFERENCE)
+--------------------------------------------------------------------------------
+
+Production Dashboard (bookmark this):
+   https://supabase.com/dashboard/project/jucjlxepcfhhlzieovmh
+
+API URL for .env files:
+   https://jucjlxepcfhhlzieovmh.supabase.co
+
+Project folder:
+   c:\Users\Lenovo\Desktop\gymapplication-main
+
+Admin environment file:
+   admin\.env.local
+
+Local Studio (testing only, after "npx supabase start"):
+   http://127.0.0.1:54323
+
+Migration files location:
+   supabase\migrations\
+
+
+SECTION 2: WHICH LINK TO USE
+--------------------------------------------------------------------------------
+
+PRODUCTION (your live database - use for paid server):
+   • Dashboard: https://supabase.com/dashboard/project/jucjlxepcfhhlzieovmh
+   • API URL: https://jucjlxepcfhhlzieovmh.supabase.co
+   • Use for: Admin app on paid server, mobile app, dietitian app
+
+LOCAL DEVELOPMENT (testing only):
+   • Local Studio: http://127.0.0.1:54323
+   • Only works when "npx supabase start" is running on your PC
+
+
+SECTION 3: PROJECT INFO
+--------------------------------------------------------------------------------
+
+Project Name:     sweatbox-gym
+Reference ID:     jucjlxepcfhhlzieovmh
+Region:           Central EU (Frankfurt)
+Status:           Linked
+
+
+SECTION 4: COMMON TASKS - WHAT TO DO
+--------------------------------------------------------------------------------
+
+Open production Supabase dashboard:
+   Go to https://supabase.com/dashboard/project/jucjlxepcfhhlzieovmh
+
+Get API keys for .env:
+   Supabase dashboard → Project Settings → API → copy Project URL, anon key, service_role key
+
+Edit database schema:
+   1. Edit files in supabase\migrations\
+   2. Run: npx supabase db push
+
+Check what migrations are applied:
+   Run: npx supabase migration list
+   (Run from project folder)
+
+View tables/data in production:
+   Supabase dashboard → Table Editor
+
+View tables when testing locally:
+   Run: npx supabase start
+   Then open: http://127.0.0.1:54323
+
+
+SECTION 5: SUPABASE CLI COMMANDS (run from project root)
+--------------------------------------------------------------------------------
+
+IMPORTANT: Always run from project root, NOT from mobile/ or admin/:
+   cd c:\Users\Lenovo\Desktop\gymapplication-main
+
+Push migrations to REMOTE (production) database:
+   npx supabase db push
+
+Push migrations when multiple projects exist (specify linked):
+   npx supabase link --project-ref jucjlxepcfhhlzieovmh
+   npx supabase db push
+
+Check migration status (see which are applied):
+   npx supabase migration list
+
+Start LOCAL Supabase (optional, requires Docker):
+   npx supabase start
+
+Stop local Supabase:
+   npx supabase stop
+
+List your Supabase projects:
+   npx supabase projects list
+
+Link this folder to a project (if not already linked):
+   npx supabase link --project-ref jucjlxepcfhhlzieovmh
+
+Schema dump (requires Docker, local only):
+   npx supabase db dump --schema public
+
+Schema diff (requires Docker):
+   npx supabase db diff
+
+
+SECTION 6: MIGRATION STATUS
+--------------------------------------------------------------------------------
+
+All migrations synced (Local and Remote):
+   • 20250219000000_base_schema
+   • 20250220000000_schema_fixes
+   • 20250220100000_subscription_types_and_options
+   • 20250221000000_seed_food_database
+   • 20250222000000_trainer_offerings_and_revenue
+   • 20250223000000_security_rls_tightening (fixes Supabase security warnings)
+
+
+SECTION 7: MIGRATION FILES (do not remove)
+--------------------------------------------------------------------------------
+
+supabase\migrations\20250219000000_base_schema.sql
+   Base schema: profiles, subscriptions, exercises, foods, RLS policies, etc.
+
+supabase\migrations\20250220000000_schema_fixes.sql
+   Adds open_gym to subscription_type, scheduled_date to bookings, workout_sessions, exercise_logs
+
+supabase\migrations\20250220100000_subscription_types_and_options.sql
+   Adds normal_gym, with_pt, with_dietitian, premium for Add Member form (4 plans)
+
+supabase\migrations\20250221000000_seed_food_database.sql
+   Seeds foods table with common items
+
+supabase\migrations\20250222000000_trainer_offerings_and_revenue.sql
+   Adds amount to bookings, trainer_offerings table for session types/prices
+
+supabase\migrations\20250223000000_security_rls_tightening.sql
+   Tightens RLS policies - fixes permissive WITH CHECK (TRUE) that allowed unauthorized access
+
+
+SECTION 8: ENVIRONMENT CHECKLIST (admin\.env.local)
+--------------------------------------------------------------------------------
+
+Required variables:
+   • NEXT_PUBLIC_SUPABASE_URL          - Supabase project URL
+   • NEXT_PUBLIC_SUPABASE_ANON_KEY     - Public anon key (safe for client)
+   • SUPABASE_SERVICE_ROLE_KEY        - Service role key (REQUIRED for Add Member + Add Trainer APIs)
+
+Get values from: Supabase dashboard → Project Settings → API
+
+Example admin\.env.local:
+   NEXT_PUBLIC_SUPABASE_URL=https://jucjlxepcfhhlzieovmh.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon_key_from_dashboard>
+   SUPABASE_SERVICE_ROLE_KEY=<service_role_key_from_dashboard>
+
+WARNING: Never commit .env.local or expose SUPABASE_SERVICE_ROLE_KEY in client code.
+
+
+SECTION 9: ADMIN DASHBOARD SETUP
+--------------------------------------------------------------------------------
+
+1. Create .env.local:
+   Copy from admin\.env.local.example and fill in Supabase credentials.
+
+2. Run migrations:
+   npx supabase db push
+   (from project root)
+
+3. Create admin user:
+   • Enable Email auth: Supabase → Authentication → Providers → Email
+   • Sign up via app or Supabase Auth
+   • Run in Supabase SQL Editor:
+     INSERT INTO profiles (id, email, full_name, role)
+     VALUES ('YOUR-USER-UUID-FROM-AUTH', 'admin@yourgym.com', 'Admin', 'admin')
+     ON CONFLICT (id) DO UPDATE SET role = 'admin';
+
+4. Verify:
+   Open http://localhost:3000 and log in with admin email/password.
+
+NOTE: "db push --linked" is NOT a valid command. Use: npx supabase db push
+
+
+SECTION 10: BACKGROUND VIDEOS (Login Screens)
+--------------------------------------------------------------------------------
+
+Each platform has a looping background video on login with transparent glass-style forms.
+
+Admin (Gym):
+   Video: admin\public\videos\gym.mp4
+   Theme: Gym workout
+
+Mobile:
+   Video: mobile\assets\videos\pt_trainee.mp4
+   Theme: PT + trainee
+
+Dietitian:
+   Video: Set in dietitian\components\VideoBackground.tsx (VIDEO_SRC)
+   Theme: Nutrition
+
+Replacing videos:
+   • Admin: Replace admin\public\videos\gym.mp4
+   • Mobile: Replace mobile\assets\videos\pt_trainee.mp4 or gym.mp4
+   • Dietitian: Update VIDEO_SRC in VideoBackground.tsx
+
+
+SECTION 11: VERIFY EVERYTHING WORKED
+--------------------------------------------------------------------------------
+
+1. Push security migration (fixes Supabase vulnerability report):
+   cd c:\Users\Lenovo\Desktop\gymapplication-main
+   npx supabase db push
+
+2. Verify migrations are applied:
+   cd c:\Users\Lenovo\Desktop\gymapplication-main
+   npx supabase migration list
+
+   Expected: All 6 migrations show "Applied" for remote.
+
+2. Verify trainer_offerings table exists:
+   Supabase dashboard → Table Editor → look for "trainer_offerings"
+   Supabase dashboard → Table Editor → bookings → check for "amount" column
+
+3. Verify admin .env.local:
+   - File exists: admin\.env.local
+   - Contains: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY
+   - No typos, no extra spaces, no quotes around values
+
+
+SECTION 13: STEPS TO TEST
+--------------------------------------------------------------------------------
+
+1. Admin – Add Trainer:
+   - Start admin: cd admin; npm run dev
+   - Log in as admin
+   - Go to Trainers → Add Trainer
+   - Fill form, submit → temp password shown
+   - Confirm trainer appears in list
+
+2. Admin – Add Member:
+   - Go to Members → Add Member
+   - Fill form, choose plan, submit → temp password shown
+
+3. Flutter – Trainer login:
+   - Start app: cd mobile; flutter run
+   - Log in with trainer email + temp password
+   - If first login: Set Password screen → set new password
+   - Should land on Trainer Home (clients, revenue, time spent, offerings)
+
+4. Flutter – Client login:
+   - Log in with member email + temp password
+   - If first login: Set Password screen
+   - Should land on Client Home
+
+5. Flutter – Trainer offerings:
+   - As trainer: tap Offerings tab
+   - Add offering (name, price, duration)
+   - Confirm it appears in list
+
+
+SECTION 14: IF YOU CHANGE COMPUTERS OR FORGET
+--------------------------------------------------------------------------------
+
+1. Open project folder: c:\Users\Lenovo\Desktop\gymapplication-main
+2. Open this file: SWEATBOX_GYM_REFERENCE.txt
+3. All links and commands are here
+4. Run "npx supabase migration list" to verify connection to project
+
+
+================================================================================
+                              END OF REFERENCE
+================================================================================

@@ -1,0 +1,266 @@
+SWEATBOX GYM — ADMIN DASHBOARD WORKFLOW
+Client Presentation Script for Gamma
+Copy and paste this into Gamma to generate a professional presentation.
+--------------------------------------------------------------------------------
+
+SLIDE 1 — Title
+SweatBox Gym Admin Dashboard
+Complete Workflow Overview
+Your command center for gym operations
+
+--------------------------------------------------------------------------------
+
+SLIDE 2 — Overview
+What is the Admin Dashboard?
+A unified web platform for gym staff to manage members, trainers, bookings, nutrition, and revenue — all in one place.
+Access: Web browser (desktop or tablet)
+Login: Email and password (admin role required)
+
+--------------------------------------------------------------------------------
+
+SLIDE 3 — Dashboard Home
+Dashboard Overview
+The first screen after login shows:
+
+• Total Members — All registered gym members
+• Active Trainers — Staff available for sessions
+• Today's Bookings — PT sessions scheduled
+• Monthly Revenue — Subscription income at a glance
+• Today's Check-ins — Members who visited today
+• Pending Requests — New registrations awaiting approval
+• Recent Activity — Latest bookings and updates
+• Quick Actions — One-click shortcuts to Add Member, Create Booking, Manage Trainers, View Reports
+
+--------------------------------------------------------------------------------
+
+SLIDE 4 — Add Member Flow (Step 1)
+Adding a New Member — Step 1
+Click "Add Member" from the dashboard or Members page.
+
+Enter member details:
+• Full Name (required)
+• Email (required)
+• Phone (optional)
+• Subscription Plan (required) — choose from 4 plans:
+  - Normal Gym — $150/month
+  - Personal Training — $350/month
+  - Nutrition Plan — $300/month
+  - Premium Package — $550/month
+• Fitness Goal (optional) — Weight loss, Muscle gain, General fitness, Strength, Endurance
+
+--------------------------------------------------------------------------------
+
+SLIDE 5 — Add Member Flow (Step 2)
+Adding a New Member — Step 2
+After submitting:
+• System creates the account instantly
+• Admin receives a temporary password to share with the client
+• Client must change password on first login in the mobile app
+• Member is automatically added to the roster with an active 1-month subscription
+• Loyalty tracking starts from day one
+
+--------------------------------------------------------------------------------
+
+SLIDE 6 — Registrations (Incoming Requests)
+Registration Requests
+For members who sign up via the mobile app first:
+
+• View all pending, approved, or rejected requests
+• Filter by status (pending, approved, rejected)
+• Review each request: name, email, phone, requested plan, fitness goal
+• Approve: Adds member and grants access
+• Reject: Option to add notes explaining why
+• Badge shows pending count in sidebar for quick attention
+
+--------------------------------------------------------------------------------
+
+SLIDE 7 — Members Management
+Members Page
+Central hub for all gym members:
+
+• View all members in card or list format
+• Search by name or email
+• Filter by fitness goal (weight loss, muscle gain, etc.)
+• Edit member details (name, email, phone, goal)
+• Delete members when needed
+• See join date and subscription status
+• Quick stats: Total members, members with active goals
+
+--------------------------------------------------------------------------------
+
+SLIDE 8 — Trainers
+Trainers Management
+Manage your personal training team:
+
+• View all trainers and their profiles
+• Add new trainers to the system
+• Edit trainer details, specializations, certifications
+• Activate or deactivate trainers
+• See trainer capacity and availability
+• Trainers appear in dropdowns when creating bookings
+
+--------------------------------------------------------------------------------
+
+SLIDE 9 — Bookings
+Bookings (PT Sessions)
+Schedule and manage personal training sessions:
+
+• Calendar view — pick a date to see that day's sessions
+• View all bookings: client, trainer, time slot, status
+• Create new booking: select client, trainer, date, start/end time
+• Update booking status: Pending, Confirmed, Completed, Cancelled
+• Filter by status or date
+• Sessions show client and trainer names for easy identification
+
+--------------------------------------------------------------------------------
+
+SLIDE 10 — Attendance
+Attendance & Check-ins
+Track who visits the gym each day:
+
+• Daily view — see all check-ins for a selected date
+• Member stats — monthly visits, total visits, last visit per member
+• Search members by name
+• View check-in time for each member
+• Identify regular attendees vs. those who need follow-up
+• Data feeds into loyalty and retention reports
+
+--------------------------------------------------------------------------------
+
+SLIDE 11 — Client Nutrition
+Client Nutrition (Dietitian Integration)
+Admin overview of nutrition programs:
+
+• View clients with diet plans assigned
+• See diet plan status: Active, Completed, Paused, Draft
+• View body composition history (weight, BMI, body fat, etc.)
+• Track meal logs and adherence
+• See cheat days and meal commitments
+• Navigate between clients to review nutrition progress
+• Complements the dedicated Dietitian app for detailed meal planning
+
+--------------------------------------------------------------------------------
+
+SLIDE 12 — Exercises
+Exercises Library
+Manage the exercise database for workouts:
+
+• Add, edit, delete exercises
+• Fields: Name, description, muscle group, equipment, difficulty
+• Video URL and image URL for demonstrations
+• Used by trainers and clients in workout plans
+• Filter and search exercises
+• Categorize for easy discovery (e.g., chest, legs, cardio)
+
+--------------------------------------------------------------------------------
+
+SLIDE 13 — Subscriptions
+Subscriptions Management
+Monitor and manage member plans:
+
+• View all active, expired, or cancelled subscriptions
+• See plan type, start date, end date, price, status
+• Filter by status or plan type
+• Add or extend subscriptions for members
+• Track revenue per plan
+• Identify renewals and expirations
+
+--------------------------------------------------------------------------------
+
+SLIDE 14 — Requests
+Trainer & Dietitian Requests
+Members can request trainers or dietitians from the app:
+
+• View pending, approved, or rejected requests
+• Approve or reject with admin notes
+• Assign trainer or dietitian to the member
+• Filter by status
+• Badge in sidebar for pending items
+• Keeps admin informed of member needs
+
+--------------------------------------------------------------------------------
+
+SLIDE 15 — Loyalty
+Loyalty Program
+Reward long-term members:
+
+• View loyalty tiers: Bronze, Silver, Gold, Platinum
+• Track consecutive months per member
+• See who qualifies for discounts or free sessions
+• Monitor total points and streaks
+• Encourage retention with visible rewards
+• Data from subscription history and attendance
+
+--------------------------------------------------------------------------------
+
+SLIDE 16 — Reports
+Reports & Analytics
+Business and nutrition insights:
+
+Business Reports:
+• Total revenue, new members, completed sessions
+• Member retention percentage
+• Revenue by month (chart)
+• New members by month (chart)
+• Revenue growth trends
+
+Nutrition Reports:
+• Total diet plans, active plans
+• Clients with plans vs. without
+• Average completion rate
+• Meal logs this week
+• Popular meal types
+• Plan type breakdown (weekly vs. monthly)
+
+--------------------------------------------------------------------------------
+
+SLIDE 17 — Settings
+Settings
+Configure the gym system:
+
+• Gym profile and contact info
+• Default settings for new members
+• Notification preferences
+• Integration options
+• Admin user management (if supported)
+
+--------------------------------------------------------------------------------
+
+SLIDE 18 — End-to-End Workflow Summary
+Typical Day Workflow
+
+Morning:
+1. Log in — see dashboard with today's stats
+2. Check pending registrations — approve or reject new sign-ups
+3. Review today's bookings — confirm sessions
+
+During the day:
+4. Add walk-in members via Add Member
+5. Create bookings when clients call or visit
+6. Monitor attendance as members check in
+7. Handle trainer/dietitian requests as they arrive
+
+End of day:
+8. Review reports — revenue, retention, nutrition stats
+9. Plan next day — check upcoming bookings and expiring subscriptions
+
+--------------------------------------------------------------------------------
+
+SLIDE 19 — Key Benefits
+Why This Dashboard?
+
+• Single login for all operations — no switching between tools
+• Real-time data — see updates as they happen
+• Mobile-friendly — use on tablet at reception
+• Secure — role-based access, only admins see this
+• Integrated — members, trainers, nutrition, and finance in one place
+• Scalable — add more members and plans without limits
+
+--------------------------------------------------------------------------------
+
+SLIDE 20 — Closing
+SweatBox Gym Admin Dashboard
+Your complete command center for gym operations.
+
+Questions?
+Contact your implementation team for training and support.
