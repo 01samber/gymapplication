@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase'
 
 export default function Header() {
   const router = useRouter()
+  const [headerSearch, setHeaderSearch] = useState('')
   const [showQuickAdd, setShowQuickAdd] = useState(false)
   const [showAddMember, setShowAddMember] = useState(false)
   const [showAddTrainer, setShowAddTrainer] = useState(false)
@@ -45,6 +46,13 @@ export default function Header() {
             <input
               type="text"
               placeholder="Search members, trainers, bookings..."
+              value={headerSearch}
+              onChange={(e) => setHeaderSearch(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && headerSearch.trim()) {
+                  router.push(`/dashboard/members?q=${encodeURIComponent(headerSearch.trim())}`)
+                }
+              }}
               className="w-full pl-10 pr-4 py-2 glass-input rounded text-sm text-white placeholder-gray-400 focus:outline-none"
             />
           </div>

@@ -33,6 +33,7 @@ export default function RequestsPage() {
   const [loading, setLoading] = useState(true)
   const [requests, setRequests] = useState<Request[]>([])
   const [filterStatus, setFilterStatus] = useState('pending')
+  const [searchQuery, setSearchQuery] = useState('')
   const [showTransferModal, setShowTransferModal] = useState<Request | null>(null)
   const [trainers, setTrainers] = useState<{ id: string; name: string }[]>([])
 
@@ -178,7 +179,15 @@ export default function RequestsPage() {
     }
   }
 
-  const filteredRequests = requests.filter(r => !filterStatus || r.status === filterStatus)
+  const q = searchQuery.trim().toLowerCase()
+  const filteredRequests = requests.filter(r => {
+    const matchesStatus = !filterStatus || r.status === filterStatus
+    const matchesSearch = !q ||
+      (r.trainer_name?.toLowerCase().includes(q)) ||
+      (r.client_name?.toLowerCase().includes(q)) ||
+      (r.request_type || '').toLowerCase().includes(q)
+    return matchesStatus && matchesSearch
+  })
 
   const stats = {
     pending: requests.filter(r => r.status === 'pending').length,
@@ -261,9 +270,20 @@ export default function RequestsPage() {
         </div>
       </div>
 
-      {/* Filter */}
+      {/* Filter & Search */}
       <div className="glass-card rounded-lg p-4 shadow-sm">
-        <div className="flex glass-subtle rounded-xl p-1 w-fit">
+        <div className="flex flex-wrap gap-4 items-center">
+          <div className="relative flex-1 min-w-[200px] max-w-md">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search by trainer, client, or request type..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 glass-input border-0 rounded-xl text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20"
+            />
+          </div>
+          <div className="flex glass-subtle rounded-xl p-1 w-fit">
           {['pending', 'approved', 'rejected', ''].map((status) => (
             <button
               key={status}
@@ -275,6 +295,7 @@ export default function RequestsPage() {
               {status ? status.charAt(0).toUpperCase() + status.slice(1) : 'All'}
             </button>
           ))}
+        </div>
         </div>
       </div>
 

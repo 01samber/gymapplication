@@ -139,24 +139,24 @@ export default function FoodsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 p-8 text-white">
-        <div className="absolute inset-0 bg-black/10" />
-        <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-white/10 blur-3xl" />
+      {/* Header - flipbook cover style */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-700 via-amber-600 to-amber-700 p-8 text-amber-50 paper-stack">
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-900/20 to-transparent" />
+        <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-amber-400/10 blur-3xl" />
         
         <div className="relative z-10 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="p-4 bg-white/20 rounded-2xl backdrop-blur-sm">
-              <Apple className="w-10 h-10" />
+            <div className="p-4 bg-amber-600/30 rounded-2xl border border-amber-500/30">
+              <Apple className="w-10 h-10 text-amber-100" />
             </div>
             <div>
               <h1 className="text-3xl font-bold">Food Database</h1>
-              <p className="text-white/80">Manage foods and nutritional information</p>
+              <p className="text-amber-100/90">Manage foods and nutritional information</p>
             </div>
           </div>
           <button
             onClick={() => setShowForm(true)}
-            className="px-6 py-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl font-semibold flex items-center gap-2 transition-colors"
+            className="px-6 py-3 bg-amber-600/40 hover:bg-amber-600/50 rounded-xl font-semibold flex items-center gap-2 transition-colors border border-amber-500/30"
           >
             <Plus className="w-5 h-5" />
             Add Food
@@ -167,19 +167,19 @@ export default function FoodsPage() {
       {/* Filters */}
       <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-muted" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search foods..."
-            className="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            className="w-full pl-12 pr-4 py-3 bg-paper border border-amber-900/15 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30 text-ink placeholder-ink-muted"
           />
         </div>
         <select
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
-          className="px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
+          className="px-4 py-3 bg-paper border border-amber-900/15 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30 text-ink"
         >
           <option value="">All Categories</option>
           {FOOD_CATEGORIES.map((cat) => (
@@ -194,10 +194,10 @@ export default function FoodsPage() {
           <Loader2 className="w-10 h-10 animate-spin text-primary" />
         </div>
       ) : foods.length === 0 ? (
-        <div className="bg-white rounded-2xl p-16 text-center">
-          <Apple className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-700 mb-2">No foods found</h3>
-          <p className="text-gray-500">
+        <div className="page-card rounded-2xl p-16 text-center paper-stack">
+          <Apple className="w-16 h-16 text-amber-300 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-ink mb-2">No foods found</h3>
+          <p className="text-ink-muted">
             {searchQuery || selectedCategory ? 'Try different search criteria' : 'Start by adding foods to the database'}
           </p>
         </div>
@@ -206,42 +206,42 @@ export default function FoodsPage() {
           {foods.map((food) => (
             <div 
               key={food.id}
-              className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 card-hover"
+              className="page-card rounded-2xl p-6 card-hover paper-stack"
             >
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h3 className="font-semibold text-gray-900">{food.name}</h3>
+                  <h3 className="font-semibold text-ink">{food.name}</h3>
                   {food.name_ar && (
-                    <p className="text-sm text-gray-500 mt-0.5">{food.name_ar}</p>
+                    <p className="text-sm text-ink-muted mt-0.5">{food.name_ar}</p>
                   )}
-                  <span className="inline-block px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-lg mt-2">
+                  <span className="inline-block px-2 py-1 bg-amber-900/10 text-ink-muted text-xs rounded-lg mt-2">
                     {FOOD_CATEGORIES.find(c => c.value === food.category)?.label || food.category}
                   </span>
                 </div>
-                <div className="flex items-center gap-1 px-3 py-1 bg-orange-50 rounded-lg">
-                  <Flame className="w-4 h-4 text-orange-500" />
-                  <span className="text-sm font-semibold text-orange-600">
+                <div className="flex items-center gap-1 px-3 py-1 bg-amber-100 rounded-lg">
+                  <Flame className="w-4 h-4 text-amber-600" />
+                  <span className="text-sm font-semibold text-amber-700">
                     {food.calories_per_serving || 0}
                   </span>
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-3">
-                <div className="text-center p-2 bg-blue-50 rounded-lg">
-                  <p className="text-xs text-blue-600">Protein</p>
-                  <p className="font-semibold text-blue-700">{food.protein_g || 0}g</p>
+                <div className="text-center p-2 bg-primary/10 rounded-lg">
+                  <p className="text-xs text-primary">Protein</p>
+                  <p className="font-semibold text-ink">{food.protein_g || 0}g</p>
                 </div>
-                <div className="text-center p-2 bg-amber-50 rounded-lg">
-                  <p className="text-xs text-amber-600">Carbs</p>
-                  <p className="font-semibold text-amber-700">{food.carbs_g || 0}g</p>
+                <div className="text-center p-2 bg-amber-100 rounded-lg">
+                  <p className="text-xs text-amber-700">Carbs</p>
+                  <p className="font-semibold text-ink">{food.carbs_g || 0}g</p>
                 </div>
-                <div className="text-center p-2 bg-rose-50 rounded-lg">
-                  <p className="text-xs text-rose-600">Fat</p>
-                  <p className="font-semibold text-rose-700">{food.fat_g || 0}g</p>
+                <div className="text-center p-2 bg-amber-200/50 rounded-lg">
+                  <p className="text-xs text-amber-800">Fat</p>
+                  <p className="font-semibold text-ink">{food.fat_g || 0}g</p>
                 </div>
               </div>
 
-              <p className="text-xs text-gray-400 mt-3 text-center">
+              <p className="text-xs text-ink-muted mt-3 text-center">
                 Per {food.serving_size}{food.serving_unit}
               </p>
             </div>
@@ -251,13 +251,13 @@ export default function FoodsPage() {
 
       {/* Add Food Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white p-6 border-b border-gray-100 flex items-center justify-between z-10">
-              <h2 className="text-xl font-bold text-gray-900">Add New Food</h2>
+        <div className="fixed inset-0 bg-ink/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-paper-light rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto paper-stack border border-amber-900/20">
+            <div className="sticky top-0 bg-paper-light p-6 border-b border-amber-900/10 flex items-center justify-between z-10">
+              <h2 className="text-xl font-bold text-ink">Add New Food</h2>
               <button
                 onClick={() => { setShowForm(false); resetForm() }}
-                className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+                className="p-2 hover:bg-amber-900/10 rounded-xl transition-colors text-ink"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -267,37 +267,37 @@ export default function FoodsPage() {
               {/* Basic Info */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-ink mb-1">
                     Name (English) *
                   </label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    className="w-full px-3 py-2 border border-amber-900/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 bg-paper text-ink"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-ink mb-1">
                     Name (Arabic)
                   </label>
                   <input
                     type="text"
                     value={formData.name_ar}
                     onChange={(e) => setFormData({ ...formData, name_ar: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    className="w-full px-3 py-2 border border-amber-900/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 bg-paper text-ink"
                     dir="rtl"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <label className="block text-sm font-medium text-ink mb-1">Category</label>
                 <select
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-full px-3 py-2 border border-amber-900/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 bg-paper text-ink"
                 >
                   {FOOD_CATEGORIES.map((cat) => (
                     <option key={cat.value} value={cat.value}>{cat.label}</option>

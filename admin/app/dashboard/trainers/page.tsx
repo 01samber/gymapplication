@@ -116,21 +116,29 @@ export default function TrainersPage() {
   }
 
   async function handleDelete(id: string, userId: string) {
-    if (!confirm('Are you sure you want to delete this trainer?')) return
+    if (!confirm('Are you sure you want to delete this trainer? This will also remove their login account from Supabase.')) return
     try {
-      await supabase.from('trainer_profiles').delete().eq('id', id)
-      await supabase.from('profiles').delete().eq('id', userId)
+      const res = await fetch('/api/delete-trainer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ trainer_profile_id: id, user_id: userId }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to delete')
       fetchTrainers()
     } catch (error) {
       console.error('Error:', error)
+      alert(error instanceof Error ? error.message : 'Failed to delete trainer')
     }
   }
 
   const filteredTrainers = trainers.filter(t => {
     const spec = typeof t.specialization === 'string' ? t.specialization : Array.isArray(t.specialization) ? t.specialization.join(' ') : ''
-    return t.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      spec.toLowerCase().includes(searchQuery.toLowerCase())
+    const q = searchQuery.trim().toLowerCase()
+    return !q ||
+      t.full_name.toLowerCase().includes(q) ||
+      t.email.toLowerCase().includes(q) ||
+      spec.toLowerCase().includes(q)
   })
 
   const totalClients = trainers.reduce((sum, t) => sum + (t.client_count || 0), 0)

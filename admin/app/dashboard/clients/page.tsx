@@ -11,7 +11,9 @@ import {
   PartyPopper,
   Printer,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  RefreshCw,
+  Search
 } from 'lucide-react'
 
 interface Client {
@@ -90,6 +92,7 @@ const DAYS_OF_WEEK = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 export default function ClientsNutritionPage() {
   const [clients, setClients] = useState<Client[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -115,11 +118,16 @@ export default function ClientsNutritionPage() {
     }
   }, [selectedClient, activeTab])
 
+  const q = searchQuery.trim().toLowerCase()
+  const filteredClients = !q ? clients : clients.filter(c =>
+    c.full_name?.toLowerCase().includes(q) || c.email?.toLowerCase().includes(q)
+  )
+
   async function loadClients() {
     try {
       setLoading(true)
       setError(null)
-      const res = await fetch('/api/clients-list')
+      const res = await fetch('/api/clients-list', { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } })
       const data = await res.json()
       if (!res.ok) throw new Error(typeof data === 'object' && data.error ? data.error : 'Failed to load clients')
       setClients(Array.isArray(data) ? data : [])
@@ -225,15 +233,37 @@ export default function ClientsNutritionPage() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold text-white mb-2">Client Nutrition & Body Data</h1>
-      <p className="text-slate-400 text-sm mb-6">Only clients on Nutrition Plan ($300/mo) or Premium Package ($550/mo) appear here.</p>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-white mb-2">Client Nutrition & Body Data</h1>
+          <p className="text-slate-400 text-sm">Only clients on Nutrition Plan ($300/mo) or Premium Package ($550/mo) appear here. Deleted members are removed immediately.</p>
+        </div>
+        <button
+          onClick={loadClients}
+          className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg flex items-center gap-2 text-sm transition-colors"
+          title="Refresh client list"
+        >
+          <RefreshCw className="w-4 h-4" />
+          Refresh
+        </button>
+      </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Client List */}
         <div className="lg:col-span-1 glass-card rounded-xl p-4">
           <h2 className="text-lg font-semibold text-white mb-4">Clients</h2>
-          <div className="space-y-2 max-h-[600px] overflow-y-auto">
-            {clients.map(client => (
+          <div className="relative mb-4">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search clients..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+            />
+          </div>
+          <div className="space-y-2 max-h-[500px] overflow-y-auto">
+            {filteredClients.map(client => (
               <button
                 key={client.id}
                 onClick={() => setSelectedClient(client)}
@@ -247,8 +277,10 @@ export default function ClientsNutritionPage() {
                 <p className="text-xs opacity-70 truncate">{client.email}</p>
               </button>
             ))}
-            {clients.length === 0 && (
-              <p className="text-slate-400 text-center py-4">No clients found</p>
+            {filteredClients.length === 0 && (
+              <p className="text-slate-400 text-center py-4">
+                {q ? 'No matching clients' : 'No clients found'}
+              </p>
             )}
           </div>
         </div>

@@ -7,6 +7,8 @@
   "scripts": {
     "supabase": "supabase",
     "db:push": "supabase db push",
-    "db:link": "supabase link --project-ref jucjlxepcfhhlzieovmh"
+    "db:link": "supabase link --project-ref jucjlxepcfhhlzieovmh",
+    "dev:admin": "cd admin && npm run dev",
+    "dev:dietitian": "cd dietitian && npm run dev"
   }
 }

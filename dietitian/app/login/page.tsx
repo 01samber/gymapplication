@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import { Loader2, Leaf, Lock, Mail } from 'lucide-react'
+import { Loader2, BookOpen, Lock, Mail } from 'lucide-react'
 import VideoBackground from '@/components/VideoBackground'
 
 export default function LoginPage() {
@@ -26,7 +26,6 @@ export default function LoginPage() {
 
       if (signInError) throw signInError
 
-      // Check if user is a dietitian or admin
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('role')
@@ -56,107 +55,101 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex relative overflow-hidden">
-      {/* Full-screen video background */}
       <div className="absolute inset-0">
         <VideoBackground />
       </div>
-      <div className="absolute inset-0 bg-black/5 pointer-events-none" />
-      {/* Left side - Branding */}
+
+      {/* Left side - Branding (flipbook style) */}
       <div className="hidden lg:flex lg:w-1/2 p-12 flex-col justify-between relative z-10">
-        <div className="relative">
+        <div>
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
-              <Leaf className="w-8 h-8 text-white" />
+            <div className="p-3 bg-primary/20 rounded-xl border border-primary/30">
+              <BookOpen className="w-8 h-8 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">SweatBox Nutrition</h1>
-              <p className="text-white/80 text-sm">Dietitian Portal</p>
+              <h1 className="text-2xl font-bold text-ink">SweatBox Nutrition</h1>
+              <p className="text-ink-muted text-sm">Dietitian Portal</p>
             </div>
           </div>
         </div>
 
-        <div className="relative text-white drop-shadow-lg">
+        <div className="text-ink">
           <h2 className="text-4xl font-bold mb-4">
             Empower Your Clients<br />With Better Nutrition
           </h2>
-          <p className="text-white/80 text-lg max-w-md">
+          <p className="text-ink-muted text-lg max-w-md">
             Professional nutrition management platform integrated with SweatBox Gym. 
             Track body composition, create meal plans, and monitor client progress.
           </p>
         </div>
 
-        <div className="relative flex gap-8 text-white drop-shadow">
+        <div className="flex gap-8 text-ink">
           <div>
-            <p className="text-3xl font-bold">500+</p>
-            <p className="text-white/70 text-sm">Active Clients</p>
+            <p className="text-3xl font-bold text-primary">500+</p>
+            <p className="text-ink-muted text-sm">Active Clients</p>
           </div>
           <div>
-            <p className="text-3xl font-bold">1000+</p>
-            <p className="text-white/70 text-sm">Meal Plans</p>
+            <p className="text-3xl font-bold text-primary">1000+</p>
+            <p className="text-ink-muted text-sm">Meal Plans</p>
           </div>
           <div>
-            <p className="text-3xl font-bold">85%</p>
-            <p className="text-white/70 text-sm">Compliance Rate</p>
+            <p className="text-3xl font-bold text-primary">85%</p>
+            <p className="text-ink-muted text-sm">Compliance Rate</p>
           </div>
         </div>
       </div>
 
       {/* Right side - Login Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 relative z-10">
-        <div className="w-full max-w-md backdrop-blur-2xl bg-black/40 border border-white/10 rounded-2xl shadow-2xl p-8">
-          {/* Mobile header */}
+        <div className="w-full max-w-md bg-paper-light border border-amber-900/20 rounded-2xl shadow-xl p-8 paper-stack">
           <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
-            <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
-              <Leaf className="w-8 h-8 text-white" />
+            <div className="p-3 bg-primary/20 rounded-xl border border-primary/30">
+              <BookOpen className="w-8 h-8 text-primary" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">SweatBox Nutrition</h1>
-              <p className="text-white/80 text-sm">Dietitian Portal</p>
+              <h1 className="text-xl font-bold text-ink">SweatBox Nutrition</h1>
+              <p className="text-ink-muted text-sm">Dietitian Portal</p>
             </div>
           </div>
 
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-white drop-shadow-lg">Welcome Back</h2>
-            <p className="text-white/90 mt-2 drop-shadow">Sign in to access your dashboard</p>
+            <h2 className="text-2xl font-bold text-ink">Welcome Back</h2>
+            <p className="text-ink-muted mt-2">Sign in to access your dashboard</p>
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-500/30 backdrop-blur-sm border border-red-300/50 rounded-xl text-white text-sm">
+            <div className="mb-6 p-4 bg-red-100 border border-red-200 rounded-xl text-red-700 text-sm">
               {error}
             </div>
           )}
 
           <form onSubmit={handleLogin} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-white/95 mb-2">
-                Email Address
-              </label>
+              <label className="block text-sm font-medium text-ink mb-2">Email Address</label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/80" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-muted" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="dietitian@sweatboxgym.com"
                   required
-                  className="w-full pl-12 pr-4 py-3 bg-black/20 border-0 border-b-2 border-white/30 rounded-none text-white placeholder-white/50 focus:outline-none focus:ring-0 focus:border-primary transition-all"
+                  className="w-full pl-12 pr-4 py-3 bg-paper border border-amber-900/15 rounded-xl text-ink placeholder-ink-muted focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-white/95 mb-2">
-                Password
-              </label>
+              <label className="block text-sm font-medium text-ink mb-2">Password</label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/80" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-muted" />
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   required
-                  className="w-full pl-12 pr-4 py-3 bg-black/20 border-0 border-b-2 border-white/30 rounded-none text-white placeholder-white/50 focus:outline-none focus:ring-0 focus:border-primary transition-all"
+                  className="w-full pl-12 pr-4 py-3 bg-paper border border-amber-900/15 rounded-xl text-ink placeholder-ink-muted focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
                 />
               </div>
             </div>
@@ -164,7 +157,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-white/20 text-white rounded-lg font-semibold hover:bg-white/30 border border-white/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full py-3 bg-primary text-amber-50 rounded-xl font-semibold hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
@@ -177,7 +170,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p className="mt-8 text-center text-sm text-white/80">
+          <p className="mt-8 text-center text-sm text-ink-muted">
             Need access? Contact your administrator.
           </p>
         </div>

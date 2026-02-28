@@ -20,7 +20,7 @@ export async function GET() {
       .order('created_at', { ascending: false })
 
     if (tpError) throw tpError
-    if (!trainerProfiles?.length) return NextResponse.json([])
+    if (!trainerProfiles?.length) return NextResponse.json([], { headers: { 'Cache-Control': 'no-store' } })
 
     const userIds = trainerProfiles.map((t: { user_id: string }) => t.user_id)
     const { data: profiles, error } = await admin
@@ -30,7 +30,9 @@ export async function GET() {
       .order('full_name')
 
     if (error) throw error
-    return NextResponse.json(profiles || [])
+    return NextResponse.json(profiles || [], {
+      headers: { 'Cache-Control': 'no-store, max-age=0' },
+    })
   } catch (err) {
     console.error('Trainers API error:', err)
     return NextResponse.json(

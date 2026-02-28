@@ -261,13 +261,13 @@ export default function BodyAnalysisPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-pink-500 via-rose-500 to-red-500 p-8 text-white">
-        <div className="absolute inset-0 bg-black/10" />
-        <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-white/10 blur-3xl" />
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-700 via-amber-600 to-amber-700 p-8 text-amber-50 paper-stack">
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-900/20 to-transparent" />
+        <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-amber-400/10 blur-3xl" />
         
         <div className="relative z-10 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="p-4 bg-white/20 rounded-2xl backdrop-blur-sm">
+            <div className="p-4 bg-amber-600/30 rounded-2xl border border-amber-500/30">
               <Activity className="w-10 h-10" />
             </div>
             <div>
@@ -278,11 +278,11 @@ export default function BodyAnalysisPage() {
           {selectedClient && (
             <div className="flex items-center gap-3">
               {/* View Mode Toggle */}
-              <div className="flex bg-white/20 rounded-xl p-1">
+              <div className="flex bg-amber-600/30 rounded-xl p-1 border border-amber-500/20">
                 <button
                   onClick={() => setViewMode('tracker')}
                   className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
-                    viewMode === 'tracker' ? 'bg-white text-rose-600' : 'text-white hover:bg-white/10'
+                    viewMode === 'tracker' ? 'bg-amber-50 text-amber-700' : 'text-amber-100 hover:bg-amber-600/40'
                   }`}
                 >
                   <BarChart3 className="w-4 h-4 inline mr-2" />
@@ -291,7 +291,7 @@ export default function BodyAnalysisPage() {
                 <button
                   onClick={() => setViewMode('table')}
                   className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
-                    viewMode === 'table' ? 'bg-white text-rose-600' : 'text-white hover:bg-white/10'
+                    viewMode === 'table' ? 'bg-amber-50 text-amber-700' : 'text-amber-100 hover:bg-amber-600/40'
                   }`}
                 >
                   <FileText className="w-4 h-4 inline mr-2" />
@@ -304,7 +304,7 @@ export default function BodyAnalysisPage() {
                   resetForm()
                   setShowForm(true)
                 }}
-                className="px-6 py-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl font-semibold flex items-center gap-2 transition-colors"
+                className="px-6 py-3 bg-amber-600/40 hover:bg-amber-600/50 rounded-xl font-semibold flex items-center gap-2 transition-colors border border-amber-500/30"
               >
                 <Plus className="w-5 h-5" />
                 Add Measurement
@@ -315,7 +315,7 @@ export default function BodyAnalysisPage() {
       </div>
 
       {/* Client Selector */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+      <div className="page-card rounded-2xl p-6 paper-stack">
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Select Client
         </label>
@@ -335,7 +335,7 @@ export default function BodyAnalysisPage() {
 
       {/* Content */}
       {!selectedClient ? (
-        <div className="bg-white rounded-2xl p-16 text-center">
+        <div className="page-card rounded-2xl p-16 text-center paper-stack">
           <User className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-gray-700 mb-2">Select a Client</h3>
           <p className="text-gray-500">Choose a client to view or add body composition data</p>
@@ -355,7 +355,7 @@ export default function BodyAnalysisPage() {
             />
           ) : (
             /* Table View with Edit/Delete */
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
+            <div className="page-card rounded-2xl paper-stack">
               <div className="p-6 border-b border-gray-100 flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-900">Measurement History</h2>
                 <span className="text-sm text-gray-500">{compositions.length} records</span>
@@ -456,8 +456,8 @@ export default function BodyAnalysisPage() {
       {/* Add/Edit Measurement Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white p-6 border-b border-gray-100 flex items-center justify-between z-10">
+          <div className="bg-paper-light rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto paper-stack border border-amber-900/20">
+            <div className="sticky top-0 bg-paper-light p-6 border-b border-amber-900/10 flex items-center justify-between z-10">
               <h2 className="text-xl font-bold text-gray-900">
                 {editingId ? 'Edit Body Composition' : 'Add Body Composition'}
               </h2>

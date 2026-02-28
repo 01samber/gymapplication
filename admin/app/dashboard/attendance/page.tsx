@@ -147,12 +147,12 @@ export default function AttendancePage() {
   const currentlyIn = attendanceRecords.filter(a => !a.check_out).length
   const todayTotal = attendanceRecords.length
 
+  const searchQ = searchQuery.trim().toLowerCase()
   const filteredRecords = attendanceRecords.filter(a =>
-    a.full_name?.toLowerCase().includes(searchQuery.toLowerCase())
+    !searchQ || a.full_name?.toLowerCase().includes(searchQ)
   )
-
   const filteredStats = memberStats.filter(m =>
-    m.full_name.toLowerCase().includes(searchQuery.toLowerCase())
+    !searchQ || m.full_name.toLowerCase().includes(searchQ)
   )
 
   const formatTime = (timestamp: string | null) => {

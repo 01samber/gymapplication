@@ -29,7 +29,7 @@ export async function GET() {
     if (subErr) throw subErr
 
     const clientIds = [...new Set((subData || []).map((s: any) => s.client_id))]
-    if (clientIds.length === 0) return NextResponse.json([])
+    if (clientIds.length === 0) return NextResponse.json([], { headers: { 'Cache-Control': 'no-store' } })
 
     const { data: profileData, error: profileError } = await admin
       .from('profiles')
@@ -55,7 +55,9 @@ export async function GET() {
       subscription_plan: subMap[p.id]?.subscription_type || null,
     }))
 
-    return NextResponse.json(clients)
+    return NextResponse.json(clients, {
+      headers: { 'Cache-Control': 'no-store, max-age=0' },
+    })
   } catch (err) {
     console.error('Clients list API error:', err)
     return NextResponse.json(

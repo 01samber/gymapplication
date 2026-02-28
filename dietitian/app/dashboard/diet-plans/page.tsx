@@ -494,7 +494,7 @@ export default function DietPlansPage() {
 
   async function handleSearchFoods(query: string) {
     setFoodSearch(query)
-    if (query.length < 2) {
+    if (!query.trim()) {
       setSearchResults([])
       return
     }

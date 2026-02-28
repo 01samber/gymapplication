@@ -2,73 +2,127 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Flipbook design theme */
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 245, 247, 250;
-  --background-end-rgb: 255, 255, 255;
+  --paper: #F5F0E6;
+  --paper-dark: #E8E0D0;
+  --paper-light: #FAF7F0;
+  --ink: #3D3529;
+  --ink-muted: #6B5D4F;
+  --sepia: #8B7355;
+  --binding: #7D6E5D;
+  --accent-amber: #D4A574;
+  --accent-warm: #C4956A;
+  --shadow-page: 0 2px 8px rgba(61, 53, 41, 0.08);
+  --shadow-stack: 0 4px 20px rgba(61, 53, 41, 0.12);
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  color: var(--ink);
+  background: var(--paper-light);
   min-height: 100vh;
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar - flipbook style */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--paper-dark);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: var(--sepia);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a1a1a1;
+  background: var(--binding);
 }
 
-/* Smooth transitions */
-* {
-  transition-property: background-color, border-color, color, fill, stroke;
-  transition-duration: 150ms;
-  transition-timing-function: ease-in-out;
+/* Flip card animation */
+.flip-card {
+  perspective: 1000px;
 }
 
-/* Card hover effects */
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 200px;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+.flip-card:hover .flip-card-inner,
+.flip-card.flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-card-front,
+.flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: inherit;
+}
+
+.flip-card-back {
+  transform: rotateY(180deg);
+}
+
+/* Page-like card styling */
+.page-card {
+  @apply rounded-xl;
+  background: var(--paper-light);
+  box-shadow: var(--shadow-page);
+  border: 1px solid rgba(139, 115, 85, 0.15);
+}
+
+.page-card:hover {
+  box-shadow: var(--shadow-stack);
+}
+
+/* Paper stack effect */
+.paper-stack {
+  box-shadow: 
+    0 1px 1px rgba(61, 53, 41, 0.05),
+    0 2px 4px rgba(61, 53, 41, 0.06),
+    0 4px 12px rgba(61, 53, 41, 0.08);
+}
+
+/* Flipbook binding (sidebar) */
+.flipbook-binding {
+  background: linear-gradient(135deg, var(--binding) 0%, #6B5D4F 100%);
+}
+
+/* Card hover - subtle lift like turning a page */
 .card-hover {
-  @apply transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5;
+  @apply transition-all duration-300;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-stack);
 }
 
-/* Glass morphism - same as admin for consistent styling */
-.glass {
-  @apply backdrop-blur-xl bg-black/15 border border-white/10;
-}
-
-.glass-card {
-  @apply backdrop-blur-xl bg-black/20 border border-white/10;
-}
-
-.glass-modal {
-  @apply backdrop-blur-2xl bg-black/25 border border-white/20;
-}
-
-/* Gradient backgrounds */
+/* Primary gradient for flipbook accents */
 .gradient-primary {
-  @apply bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500;
+  @apply bg-gradient-to-r from-amber-800/90 via-amber-700/90 to-amber-800/90;
 }
 
-.gradient-secondary {
-  @apply bg-gradient-to-r from-secondary-dark via-secondary to-secondary-light;
+/* Glass - softer for flipbook overlay */
+.glass-card {
+  @apply backdrop-blur-sm;
+  background: rgba(245, 240, 230, 0.85);
+  border: 1px solid rgba(139, 115, 85, 0.2);
+}
+
+.glass {
+  background: rgba(245, 240, 230, 0.9);
+  border: 1px solid rgba(139, 115, 85, 0.15);
 }

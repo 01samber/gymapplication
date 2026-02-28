@@ -115,20 +115,28 @@ export default function NutritionistsPage() {
   }
 
   async function handleDelete(id: string, userId: string) {
-    if (!confirm('Are you sure you want to delete this nutritionist?')) return
+    if (!confirm('Are you sure you want to delete this nutritionist? This will also remove their login account from Supabase.')) return
     try {
-      await supabase.from('dietitian_profiles').delete().eq('id', id)
-      await supabase.from('profiles').delete().eq('id', userId)
+      const res = await fetch('/api/delete-nutritionist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dietitian_profile_id: id, user_id: userId }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to delete')
       fetchNutritionists()
     } catch (error) {
       console.error('Error:', error)
+      alert(error instanceof Error ? error.message : 'Failed to delete nutritionist')
     }
   }
 
+  const q = searchQuery.trim().toLowerCase()
   const filteredNutritionists = nutritionists.filter(n =>
-    n.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    n.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (n.specializations || '').toLowerCase().includes(searchQuery.toLowerCase())
+    !q ||
+    n.full_name.toLowerCase().includes(q) ||
+    n.email.toLowerCase().includes(q) ||
+    (n.specializations || '').toLowerCase().includes(q)
   )
 
   const totalClients = nutritionists.reduce((sum, n) => sum + (n.client_count || 0), 0)

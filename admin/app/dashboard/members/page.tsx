@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { 
   Search, 
   Plus, 
@@ -44,12 +45,18 @@ type Member = {
 }
 
 export default function MembersPage() {
+  const searchParams = useSearchParams()
   const [loading, setLoading] = useState(true)
   const [members, setMembers] = useState<Member[]>([])
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '')
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingMember, setEditingMember] = useState<Member | null>(null)
   const [filterGoal, setFilterGoal] = useState('')
+
+  useEffect(() => {
+    const q = searchParams.get('q')
+    if (q) setSearchQuery(q)
+  }, [searchParams])
 
   useEffect(() => {
     fetchMembers()
@@ -133,9 +140,11 @@ export default function MembersPage() {
     }
   }
 
+  const q = searchQuery.trim().toLowerCase()
   const filteredMembers = members.filter(m => {
-    const matchesSearch = m.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      m.email.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesSearch = !q ||
+      m.full_name.toLowerCase().includes(q) ||
+      m.email.toLowerCase().includes(q)
     const matchesGoal = !filterGoal || m.fitness_goal === filterGoal
     return matchesSearch && matchesGoal
   })
@@ -404,16 +413,16 @@ function MemberCard({ member, onEdit, onDelete, getGoalLabel, getGoalColor, getP
               <span>{member.phone}</span>
             </div>
           )}
-          {member.assigned_trainer_name && (
+          {(member.assigned_trainer_id || member.assigned_trainer_name) && (
             <div className="flex items-center gap-2 text-sm text-gray-400">
               <UserCheck className="w-4 h-4 flex-shrink-0 text-primary/70" />
-              <span>Trainer: {member.assigned_trainer_name}</span>
+              <span>Trainer: {member.assigned_trainer_name || 'Unassigned (deleted)'}</span>
             </div>
           )}
-          {member.assigned_dietitian_name && (
+          {(member.assigned_dietitian_id || member.assigned_dietitian_name) && (
             <div className="flex items-center gap-2 text-sm text-gray-400">
               <Salad className="w-4 h-4 flex-shrink-0 text-emerald-500/80" />
-              <span>Dietitian: {member.assigned_dietitian_name}</span>
+              <span>Dietitian: {member.assigned_dietitian_name || 'Unassigned (deleted)'}</span>
             </div>
           )}
           <div className="flex items-center gap-2 text-sm text-gray-400">
@@ -451,13 +460,20 @@ function MemberFormModal({ member, isOpen, onClose, onSuccess }: {
   async function refreshStaff() {
     try {
       const [dietRes, trainRes] = await Promise.all([
-        fetch('/api/dietitians'),
-        fetch('/api/trainers'),
+        fetch('/api/dietitians', { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }),
+        fetch('/api/trainers', { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }),
       ])
       const dietData = await dietRes.json()
       const trainData = await trainRes.json()
-      setDietitians(Array.isArray(dietData) ? dietData : [])
-      setTrainers(Array.isArray(trainData) ? trainData : [])
+      const dietList = Array.isArray(dietData) ? dietData : []
+      const trainList = Array.isArray(trainData) ? trainData : []
+      setDietitians(dietList)
+      setTrainers(trainList)
+      setForm(prev => ({
+        ...prev,
+        trainer_id: prev.trainer_id && trainList.some((t: { id: string }) => t.id === prev.trainer_id) ? prev.trainer_id : '',
+        dietitian_id: prev.dietitian_id && dietList.some((d: { id: string }) => d.id === prev.dietitian_id) ? prev.dietitian_id : '',
+      }))
     } catch (e) {
       console.error('Failed to load staff:', e)
     }
@@ -491,10 +507,27 @@ function MemberFormModal({ member, isOpen, onClose, onSuccess }: {
           })
           .eq('id', member.user_id)
 
+        const planType = (form.plan as string) || 'normal_gym'
+        const trainerId = (planType === 'with_pt' || planType === 'premium') && form.trainer_id ? form.trainer_id : null
+        const dietitianId = (planType === 'with_dietitian' || planType === 'premium') && form.dietitian_id ? form.dietitian_id : null
         await supabase
           .from('client_profiles')
-          .update({ fitness_goal: form.fitness_goal || null })
+          .update({ 
+            fitness_goal: form.fitness_goal || null,
+            assigned_trainer_id: trainerId,
+            assigned_dietitian_id: dietitianId,
+          })
           .eq('id', member.id)
+        if (dietitianId) {
+          await supabase.from('client_dietitian_assignments').update({ is_active: false }).eq('client_id', member.user_id)
+          const { error: assignErr } = await supabase.from('client_dietitian_assignments').upsert(
+            { client_id: member.user_id, dietitian_id: dietitianId, is_active: true },
+            { onConflict: 'client_id,dietitian_id' }
+          )
+          if (assignErr) console.warn('Dietitian assignment upsert:', assignErr)
+        } else {
+          await supabase.from('client_dietitian_assignments').update({ is_active: false }).eq('client_id', member.user_id)
+        }
         onSuccess()
       } else {
         const res = await fetch('/api/add-member', {
@@ -613,56 +646,54 @@ function MemberFormModal({ member, isOpen, onClose, onSuccess }: {
             />
           </div>
 
-          {!member && (
-            <>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Subscription Plan *</label>
+            <select
+              value={form.plan}
+              onChange={(e) => setForm({ ...form, plan: e.target.value, dietitian_id: '', trainer_id: '' })}
+              className="w-full px-4 py-3 glass-input rounded text-white focus:outline-none focus:ring-2 focus:ring-primary/50 [&>option]:bg-surface-card [&>option]:text-white"
+              disabled={!!member}
+            >
+              <option value="normal_gym" className="bg-surface-card">Normal Gym - $150/month</option>
+              <option value="with_pt" className="bg-surface-card">Personal Training - $350/month</option>
+              <option value="with_dietitian" className="bg-surface-card">Nutrition Plan - $300/month</option>
+              <option value="premium" className="bg-surface-card">Premium Package - $550/month</option>
+            </select>
+            {member && <p className="text-xs text-gray-500 mt-1">Plan cannot be changed when editing</p>}
+          </div>
+          {(form.plan === 'with_pt' || form.plan === 'premium') && (
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Subscription Plan *</label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Assign to Trainer {!member && '*'}</label>
               <select
-                value={form.plan}
-                onChange={(e) => setForm({ ...form, plan: e.target.value, dietitian_id: '', trainer_id: '' })}
+                value={form.trainer_id}
+                onChange={(e) => setForm({ ...form, trainer_id: e.target.value })}
                 className="w-full px-4 py-3 glass-input rounded text-white focus:outline-none focus:ring-2 focus:ring-primary/50 [&>option]:bg-surface-card [&>option]:text-white"
+                required={!member}
               >
-                <option value="normal_gym" className="bg-surface-card">Normal Gym - $150/month</option>
-                <option value="with_pt" className="bg-surface-card">Personal Training - $350/month</option>
-                <option value="with_dietitian" className="bg-surface-card">Nutrition Plan - $300/month</option>
-                <option value="premium" className="bg-surface-card">Premium Package - $550/month</option>
+                <option value="" className="bg-surface-card">Select trainer</option>
+                {trainers.map(t => (
+                  <option key={t.id} value={t.id} className="bg-surface-card">{t.full_name} ({t.email})</option>
+                ))}
               </select>
+              <p className="text-xs text-gray-500 mt-1">Client will be assigned to this personal trainer</p>
             </div>
-            {(form.plan === 'with_pt' || form.plan === 'premium') && (
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Assign to Trainer *</label>
-                <select
-                  value={form.trainer_id}
-                  onChange={(e) => setForm({ ...form, trainer_id: e.target.value })}
-                  className="w-full px-4 py-3 glass-input rounded text-white focus:outline-none focus:ring-2 focus:ring-primary/50 [&>option]:bg-surface-card [&>option]:text-white"
-                  required
-                >
-                  <option value="" className="bg-surface-card">Select trainer</option>
-                  {trainers.map(t => (
-                    <option key={t.id} value={t.id} className="bg-surface-card">{t.full_name} ({t.email})</option>
-                  ))}
-                </select>
-                <p className="text-xs text-gray-500 mt-1">Client will be assigned to this personal trainer</p>
-              </div>
-            )}
-            {(form.plan === 'with_dietitian' || form.plan === 'premium') && (
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Assign to Dietitian *</label>
-                <select
-                  value={form.dietitian_id}
-                  onChange={(e) => setForm({ ...form, dietitian_id: e.target.value })}
-                  className="w-full px-4 py-3 glass-input rounded text-white focus:outline-none focus:ring-2 focus:ring-primary/50 [&>option]:bg-surface-card [&>option]:text-white"
-                  required
-                >
-                  <option value="" className="bg-surface-card">Select dietitian</option>
-                  {dietitians.map(d => (
-                    <option key={d.id} value={d.id} className="bg-surface-card">{d.full_name} ({d.email})</option>
-                  ))}
-                </select>
-                <p className="text-xs text-gray-500 mt-1">Client will appear in the dietitian&apos;s portal</p>
-              </div>
-            )}
-            </>
+          )}
+          {(form.plan === 'with_dietitian' || form.plan === 'premium') && (
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Assign to Dietitian {!member && '*'}</label>
+              <select
+                value={form.dietitian_id}
+                onChange={(e) => setForm({ ...form, dietitian_id: e.target.value })}
+                className="w-full px-4 py-3 glass-input rounded text-white focus:outline-none focus:ring-2 focus:ring-primary/50 [&>option]:bg-surface-card [&>option]:text-white"
+                required={!member}
+              >
+                <option value="" className="bg-surface-card">Select dietitian</option>
+                {dietitians.map(d => (
+                  <option key={d.id} value={d.id} className="bg-surface-card">{d.full_name} ({d.email})</option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-500 mt-1">Client will appear in the dietitian&apos;s portal</p>
+            </div>
           )}
 
           <div>

@@ -20,7 +20,7 @@ export async function GET() {
       .order('created_at', { ascending: false })
 
     if (dpError) throw dpError
-    if (!dietitianProfiles?.length) return NextResponse.json([])
+    if (!dietitianProfiles?.length) return NextResponse.json([], { headers: { 'Cache-Control': 'no-store' } })
 
     const userIds = dietitianProfiles.map((d: { user_id: string }) => d.user_id)
     const { data: profiles, error } = await admin
@@ -30,7 +30,9 @@ export async function GET() {
       .order('full_name')
 
     if (error) throw error
-    return NextResponse.json(profiles || [])
+    return NextResponse.json(profiles || [], {
+      headers: { 'Cache-Control': 'no-store, max-age=0' },
+    })
   } catch (err) {
     console.error('Dietitians API error:', err)
     return NextResponse.json(

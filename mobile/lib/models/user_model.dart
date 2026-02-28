@@ -132,7 +132,7 @@ class UserProfile extends Equatable {
     if (names.length >= 2) {
       final a = names.first[0];
       final b = names.last[0];
-      return '${a}$b'.toUpperCase();
+      return '$a$b'.toUpperCase();
     }
     return trimmed[0].toUpperCase();
   }

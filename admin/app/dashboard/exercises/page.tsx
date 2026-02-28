@@ -86,9 +86,13 @@ export default function ExercisesPage() {
     }
   }
 
+  const q = searchQuery.trim().toLowerCase()
   const filteredExercises = exercises.filter(e => {
-    const matchesSearch = e.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      e.description?.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesSearch = !q ||
+      e.name.toLowerCase().includes(q) ||
+      e.description?.toLowerCase().includes(q) ||
+      e.muscle_group?.toLowerCase().includes(q) ||
+      e.equipment?.toLowerCase().includes(q)
     const matchesMuscle = !filterMuscle || e.muscle_group === filterMuscle
     const matchesEquipment = !filterEquipment || e.equipment === filterEquipment
     return matchesSearch && matchesMuscle && matchesEquipment

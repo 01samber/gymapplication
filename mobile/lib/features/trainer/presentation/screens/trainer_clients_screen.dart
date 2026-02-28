@@ -31,7 +31,7 @@ class TrainerClientsScreen extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.people_outline, size: 64, color: AppColors.textHint),
+                  const Icon(Icons.people_outline, size: 64, color: AppColors.textHint),
                   const SizedBox(height: 16),
                   Text(
                     'No clients assigned yet',

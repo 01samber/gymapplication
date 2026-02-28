@@ -378,7 +378,7 @@ class TrainerHomeScreen extends ConsumerWidget {
                           ],
                         ),
                       ),
-                      Icon(
+                      const Icon(
                         Icons.chevron_right,
                         color: AppColors.textHint,
                         size: 20,

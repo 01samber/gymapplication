@@ -14,7 +14,7 @@ class TrainerOfferingsScreen extends ConsumerStatefulWidget {
 }
 
 class _TrainerOfferingsScreenState extends ConsumerState<TrainerOfferingsScreen> {
-  bool _showAddSheet = false;
+  final bool _showAddSheet = false;
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +37,7 @@ class _TrainerOfferingsScreenState extends ConsumerState<TrainerOfferingsScreen>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.sell_outlined, size: 64, color: AppColors.textHint),
+                  const Icon(Icons.sell_outlined, size: 64, color: AppColors.textHint),
                   const SizedBox(height: 16),
                   Text(
                     'No offerings yet',
@@ -82,7 +82,7 @@ class _TrainerOfferingsScreenState extends ConsumerState<TrainerOfferingsScreen>
                           color: AppColors.primary.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Icon(Icons.fitness_center, color: AppColors.primary),
+                        child: const Icon(Icons.fitness_center, color: AppColors.primary),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
@@ -114,7 +114,7 @@ class _TrainerOfferingsScreenState extends ConsumerState<TrainerOfferingsScreen>
                           ],
                         ),
                       ),
-                      Icon(Icons.chevron_right, color: AppColors.textHint),
+                      const Icon(Icons.chevron_right, color: AppColors.textHint),
                     ],
                   ),
                 ),
@@ -149,9 +149,9 @@ class _TrainerOfferingsScreenState extends ConsumerState<TrainerOfferingsScreen>
         padding: EdgeInsets.only(
           bottom: MediaQuery.of(ctx).viewInsets.bottom,
         ),
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: AppColors.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Padding(
           padding: const EdgeInsets.all(24),

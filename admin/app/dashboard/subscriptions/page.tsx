@@ -124,7 +124,8 @@ export default function SubscriptionsPage() {
   }
 
   const filteredSubscriptions = subscriptions.filter(s => {
-    const matchesSearch = s.client_name?.toLowerCase().includes(searchQuery.toLowerCase())
+    const q = searchQuery.trim().toLowerCase()
+    const matchesSearch = !q || s.client_name?.toLowerCase().includes(q)
     const matchesStatus = !filterStatus || s.status === filterStatus
     const matchesPlan = !filterPlan || s.plan_type === filterPlan
     return matchesSearch && matchesStatus && matchesPlan

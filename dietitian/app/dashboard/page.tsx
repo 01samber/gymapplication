@@ -9,9 +9,10 @@ import {
   Apple,
   CheckCircle2,
   Clock,
-  AlertCircle
+  ChevronLeft
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import FlipCard from '@/components/FlipCard'
 
 interface Stats {
   totalClients: number
@@ -33,14 +34,12 @@ export default function DashboardPage() {
   useEffect(() => {
     async function loadData() {
       try {
-        // Get current user
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) {
           setLoading(false)
           return
         }
 
-        // Get clients directly from database
         const { data: clients, error } = await supabase
           .from('client_dietitian_assignments')
           .select(`
@@ -64,7 +63,6 @@ export default function DashboardPage() {
           setStats(prev => ({ ...prev, totalClients: clients.length }))
         }
 
-        // Get active diet plans count
         const { count: plansCount } = await supabase
           .from('diet_plans')
           .select('*', { count: 'exact', head: true })
@@ -72,7 +70,6 @@ export default function DashboardPage() {
 
         setStats(prev => ({ ...prev, activePlans: plansCount || 0 }))
 
-        // Get pending meal logs
         const { count: logsCount } = await supabase
           .from('meal_logs')
           .select('*', { count: 'exact', head: true })
@@ -91,87 +88,74 @@ export default function DashboardPage() {
   }, [])
 
   const statCards = [
-    { 
-      title: 'Total Clients', 
-      value: stats.totalClients, 
-      icon: Users, 
-      color: 'bg-blue-500',
-      trend: '+3 this week'
-    },
-    { 
-      title: 'Active Plans', 
-      value: stats.activePlans, 
-      icon: Utensils, 
-      color: 'bg-green-500',
-      trend: 'Updated today'
-    },
-    { 
-      title: 'Pending Reviews', 
-      value: stats.pendingLogs, 
-      icon: Clock, 
-      color: 'bg-amber-500',
-      trend: 'Needs attention'
-    },
-    { 
-      title: 'Avg Compliance', 
-      value: `${stats.avgCompliance || 85}%`, 
-      icon: TrendingUp, 
-      color: 'bg-purple-500',
-      trend: '+5% this month'
-    },
+    { title: 'Total Clients', value: stats.totalClients, icon: Users, color: 'bg-amber-600/20 text-amber-700', link: '/dashboard/clients' },
+    { title: 'Active Plans', value: stats.activePlans, icon: Utensils, color: 'bg-primary/20 text-primary', link: '/dashboard/diet-plans' },
+    { title: 'Pending Reviews', value: stats.pendingLogs, icon: Clock, color: 'bg-amber-500/20 text-amber-600', link: '/dashboard/diet-plans' },
+    { title: 'Avg Compliance', value: `${stats.avgCompliance || 85}%`, icon: TrendingUp, color: 'bg-amber-700/20 text-amber-800', link: '/dashboard/clients' },
   ]
 
   return (
     <div className="space-y-6">
-      {/* Hero Header */}
-      <div className="relative overflow-hidden rounded-3xl gradient-primary p-8 text-white">
-        <div className="absolute inset-0 bg-black/10" />
-        <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-white/10 blur-3xl" />
-        <div className="absolute -bottom-20 -left-20 h-60 w-60 rounded-full bg-white/10 blur-3xl" />
+      {/* Hero - book cover style */}
+      <div className="relative overflow-hidden rounded-2xl gradient-primary p-8 text-amber-50 paper-stack">
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-900/20 to-transparent" />
+        <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-amber-400/10 blur-3xl" />
         
         <div className="relative z-10">
           <div className="flex items-center gap-4">
-            <div className="p-4 bg-white/20 rounded-2xl backdrop-blur-sm">
-              <Activity className="w-10 h-10" />
+            <div className="p-4 bg-amber-600/30 rounded-2xl border border-amber-500/30">
+              <Activity className="w-10 h-10 text-amber-100" />
             </div>
             <div>
               <h1 className="text-3xl font-bold">Welcome Back!</h1>
-              <p className="text-white/80">Here's what's happening with your clients today.</p>
+              <p className="text-amber-100/90">Here&apos;s what&apos;s happening with your clients today.</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Stats Grid */}
+      {/* Stats Grid - flip cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {statCards.map((stat) => (
-          <div 
+          <FlipCard
             key={stat.title}
-            className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 card-hover"
-          >
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-gray-500 text-sm">{stat.title}</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{stat.value}</p>
-                <p className="text-xs text-gray-400 mt-2">{stat.trend}</p>
+            front={
+              <div className="flex items-start justify-between h-full">
+                <div>
+                  <p className="text-ink-muted text-sm font-medium">{stat.title}</p>
+                  <p className="text-3xl font-bold text-ink mt-2">{stat.value}</p>
+                </div>
+                <div className={`p-3 rounded-xl ${stat.color}`}>
+                  <stat.icon className="w-6 h-6" />
+                </div>
               </div>
-              <div className={`p-3 rounded-xl ${stat.color}`}>
-                <stat.icon className="w-6 h-6 text-white" />
+            }
+            back={
+              <div className="flex flex-col justify-center h-full text-center">
+                <p className="text-ink-muted text-sm mb-3">View details</p>
+                <a
+                  href={stat.link}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-primary/20 text-primary font-medium rounded-lg hover:bg-primary/30 transition-colors"
+                >
+                  <span>Go</span>
+                  <ChevronLeft className="w-4 h-4 rotate-180" />
+                </a>
               </div>
-            </div>
-          </div>
+            }
+            className="card-hover"
+          />
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Clients */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
-          <div className="p-6 border-b border-gray-100">
+        {/* Recent Clients - page card */}
+        <div className="page-card paper-stack overflow-hidden">
+          <div className="p-6 border-b border-amber-900/10">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-900">Recent Clients</h2>
+              <h2 className="text-lg font-semibold text-ink">Recent Clients</h2>
               <a 
                 href="/dashboard/clients" 
-                className="text-sm text-primary hover:text-primary-dark transition-colors"
+                className="text-sm text-primary hover:text-primary-dark font-medium transition-colors"
               >
                 View All
               </a>
@@ -179,29 +163,29 @@ export default function DashboardPage() {
           </div>
           <div className="p-6">
             {loading ? (
-              <div className="text-center py-8 text-gray-500">Loading...</div>
+              <div className="text-center py-8 text-ink-muted">Loading...</div>
             ) : recentClients.length === 0 ? (
               <div className="text-center py-8">
-                <Users className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500">No clients assigned yet</p>
+                <Users className="w-12 h-12 text-amber-300 mx-auto mb-3" />
+                <p className="text-ink-muted">No clients assigned yet</p>
               </div>
             ) : (
               <div className="space-y-4">
                 {recentClients.map((assignment) => (
                   <div 
                     key={assignment.id}
-                    className="flex items-center gap-4 p-3 rounded-xl hover:bg-gray-50 transition-colors"
+                    className="flex items-center gap-4 p-3 rounded-xl hover:bg-amber-900/5 transition-colors"
                   >
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
                       <span className="text-sm font-semibold text-primary">
                         {assignment.client?.full_name?.charAt(0) || '?'}
                       </span>
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium text-gray-900">
+                      <p className="font-medium text-ink">
                         {assignment.client?.full_name || 'Unknown'}
                       </p>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-ink-muted">
                         {assignment.client?.email || ''}
                       </p>
                     </div>
@@ -218,54 +202,41 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
-          <div className="p-6 border-b border-gray-100">
-            <h2 className="text-lg font-semibold text-gray-900">Quick Actions</h2>
+        {/* Quick Actions - flip cards */}
+        <div className="page-card paper-stack overflow-hidden">
+          <div className="p-6 border-b border-amber-900/10">
+            <h2 className="text-lg font-semibold text-ink">Quick Actions</h2>
           </div>
           <div className="p-6 grid grid-cols-2 gap-4">
-            <a
-              href="/dashboard/body-analysis"
-              className="p-4 rounded-xl border-2 border-dashed border-gray-200 hover:border-primary hover:bg-primary/5 transition-all text-center group"
-            >
-              <Activity className="w-8 h-8 text-gray-400 group-hover:text-primary mx-auto mb-2" />
-              <p className="font-medium text-gray-700 group-hover:text-primary">Add Body Analysis</p>
-            </a>
-            <a
-              href="/dashboard/diet-plans"
-              className="p-4 rounded-xl border-2 border-dashed border-gray-200 hover:border-primary hover:bg-primary/5 transition-all text-center group"
-            >
-              <Utensils className="w-8 h-8 text-gray-400 group-hover:text-primary mx-auto mb-2" />
-              <p className="font-medium text-gray-700 group-hover:text-primary">Create Diet Plan</p>
-            </a>
-            <a
-              href="/dashboard/foods"
-              className="p-4 rounded-xl border-2 border-dashed border-gray-200 hover:border-primary hover:bg-primary/5 transition-all text-center group"
-            >
-              <Apple className="w-8 h-8 text-gray-400 group-hover:text-primary mx-auto mb-2" />
-              <p className="font-medium text-gray-700 group-hover:text-primary">Add Food</p>
-            </a>
-            <a
-              href="/dashboard/clients"
-              className="p-4 rounded-xl border-2 border-dashed border-gray-200 hover:border-primary hover:bg-primary/5 transition-all text-center group"
-            >
-              <Users className="w-8 h-8 text-gray-400 group-hover:text-primary mx-auto mb-2" />
-              <p className="font-medium text-gray-700 group-hover:text-primary">View Clients</p>
-            </a>
+            {[
+              { href: '/dashboard/body-analysis', icon: Activity, label: 'Add Body Analysis' },
+              { href: '/dashboard/diet-plans', icon: Utensils, label: 'Create Diet Plan' },
+              { href: '/dashboard/foods', icon: Apple, label: 'Add Food' },
+              { href: '/dashboard/clients', icon: Users, label: 'View Clients' },
+            ].map((action) => (
+              <a
+                key={action.label}
+                href={action.href}
+                className="p-4 rounded-xl border-2 border-dashed border-amber-900/20 hover:border-primary hover:bg-primary/5 transition-all text-center group"
+              >
+                <action.icon className="w-8 h-8 text-ink-muted group-hover:text-primary mx-auto mb-2" />
+                <p className="font-medium text-ink group-hover:text-primary text-sm">{action.label}</p>
+              </a>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Tips Section */}
-      <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl p-6 border border-emerald-100">
+      {/* Pro Tip - bookmark style */}
+      <div className="page-card p-6 border-l-4 border-primary bg-amber-50/50">
         <div className="flex items-start gap-4">
           <div className="p-3 bg-primary/20 rounded-xl">
             <CheckCircle2 className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900">Pro Tip</h3>
-            <p className="text-gray-600 mt-1">
-              Review your clients' meal logs daily to provide timely feedback and improve compliance rates.
+            <h3 className="font-semibold text-ink">Pro Tip</h3>
+            <p className="text-ink-muted mt-1">
+              Review your clients&apos; meal logs daily to provide timely feedback and improve compliance rates.
               Regular check-ins help clients stay motivated and on track with their nutrition goals.
             </p>
           </div>

@@ -27,6 +27,7 @@ type Booking = {
   start_time: string
   end_time: string
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed'
+  session_type?: string
   notes: string | null
   client_name?: string
   trainer_name?: string
@@ -38,6 +39,7 @@ export default function BookingsPage() {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
   const [showAddModal, setShowAddModal] = useState(false)
   const [filterStatus, setFilterStatus] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
   const [clients, setClients] = useState<{ id: string; name: string }[]>([])
   const [trainers, setTrainers] = useState<{ id: string; name: string; trainer_profile_id: string }[]>([])
 
@@ -265,9 +267,19 @@ export default function BookingsPage() {
         </div>
       </div>
 
-      {/* Date Navigator */}
+      {/* Date Navigator & Search */}
       <div className="glass-card rounded-lg p-4 border border-white/10">
         <div className="flex flex-wrap gap-4 items-center justify-between">
+          <div className="relative flex-1 min-w-[220px] max-w-md">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search by client, trainer, or session..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 glass-input border-0 rounded-xl text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20"
+            />
+          </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => navigateDate(-1)}

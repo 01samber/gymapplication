@@ -49,7 +49,7 @@ class _AddMealDialogState extends ConsumerState<AddMealDialog> {
   }
 
   Future<void> _searchFoods(String query) async {
-    if (query.length < 2) {
+    if (query.trim().isEmpty) {
       setState(() {
         _searchResults = [];
         _isSearching = false;

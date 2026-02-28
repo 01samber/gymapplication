@@ -144,12 +144,12 @@ export default function LoyaltyPage() {
     }
   }
 
+  const q = searchQuery.trim().toLowerCase()
   const filteredMembers = members.filter(m =>
-    m.full_name?.toLowerCase().includes(searchQuery.toLowerCase())
+    !q || m.full_name?.toLowerCase().includes(q)
   )
-
   const filteredRewards = rewards.filter(r =>
-    r.client_name?.toLowerCase().includes(searchQuery.toLowerCase())
+    !q || r.client_name?.toLowerCase().includes(q)
   )
 
   const stats = {

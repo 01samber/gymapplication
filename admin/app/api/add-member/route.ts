@@ -83,8 +83,16 @@ export async function POST(req: NextRequest) {
     }
 
     const planType = planConfig.subscriptionType
-    const assignedTrainer = (planType === 'with_pt' || planType === 'premium') && trainer_id ? trainer_id : null
-    const assignedDietitian = (planType === 'with_dietitian' || planType === 'premium') && dietitian_id ? dietitian_id : null
+    let assignedTrainer: string | null = null
+    let assignedDietitian: string | null = null
+    if ((planType === 'with_pt' || planType === 'premium') && trainer_id) {
+      const { data: tp } = await adminClient.from('trainer_profiles').select('user_id').eq('user_id', trainer_id).single()
+      if (tp) assignedTrainer = trainer_id
+    }
+    if ((planType === 'with_dietitian' || planType === 'premium') && dietitian_id) {
+      const { data: dp } = await adminClient.from('dietitian_profiles').select('user_id').eq('user_id', dietitian_id).single()
+      if (dp) assignedDietitian = dietitian_id
+    }
 
     const { error: clientError } = await adminClient.from('client_profiles').insert({
       user_id: userId,
@@ -133,14 +141,14 @@ export async function POST(req: NextRequest) {
     }
 
     // Assign to dietitian when Nutrition Plan or Premium (admin passes dietitian_id)
-    if ((planType === 'with_dietitian' || planType === 'premium') && dietitian_id) {
+    if ((planType === 'with_dietitian' || planType === 'premium') && assignedDietitian) {
       const { error: assignErr } = await adminClient.from('client_dietitian_assignments').insert({
         client_id: userId,
-        dietitian_id,
+        dietitian_id: assignedDietitian,
         is_active: true,
       })
       if (!assignErr || assignErr.message?.toLowerCase().includes('duplicate')) {
-        await adminClient.from('client_profiles').update({ assigned_dietitian_id: dietitian_id }).eq('user_id', userId)
+        await adminClient.from('client_profiles').update({ assigned_dietitian_id: assignedDietitian }).eq('user_id', userId)
       }
     }
 
