@@ -166,28 +166,16 @@ export default function LoyaltyPage() {
 
   return (
     <div className="space-y-6">
-      {/* Hero Header - UFC/FIFA theme */}
-      <div className="relative overflow-hidden rounded-lg border border-white/10 bg-gradient-to-br from-surface-card via-surface-light to-surface-card p-8">
+      {/* Hero Header - matches Subscriptions */}
+      <div className="relative overflow-hidden rounded-lg glass-card p-8">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent-red/5" />
         <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-primary/10 blur-3xl" />
         <div className="absolute -bottom-20 -left-20 h-60 w-60 rounded-full bg-accent-red/10 blur-3xl" />
         
-        <div className="absolute top-4 right-10 text-primary/20">
-          <Star className="w-8 h-8 fill-current" />
-        </div>
-        <div className="absolute bottom-8 right-20 text-primary/10">
-          <Star className="w-6 h-6 fill-current" />
-        </div>
-        
         <div className="relative z-10">
-          <div className="flex items-center gap-4">
-            <div className="p-4 bg-primary/20 border border-primary/40 rounded-lg">
-              <Gift className="w-10 h-10 text-primary" />
-            </div>
-            <div>
-              <h1 className="font-display text-2xl font-bold text-white tracking-wide">Loyalty Program</h1>
-              <p className="text-gray-400">12 months = 1 FREE PT month</p>
-            </div>
+          <div>
+            <h1 className="font-display text-2xl font-bold text-white tracking-wide">Loyalty Program</h1>
+            <p className="text-gray-400">12 months = 1 FREE PT month</p>
           </div>
 
           <div className="flex gap-6 mt-8">
@@ -223,7 +211,7 @@ export default function LoyaltyPage() {
       </div>
 
       {/* Controls */}
-      <div className="glass-card rounded-lg border border-white/10 p-4 shadow-sm">
+      <div className="glass-card rounded-lg p-4 shadow-sm">
         <div className="flex flex-wrap gap-4 items-center justify-between">
           <div className="flex glass-subtle rounded-xl p-1">
             <button
@@ -267,7 +255,7 @@ export default function LoyaltyPage() {
         filteredMembers.length === 0 ? (
           <div className="glass-card rounded-lg p-16 text-center">
             <Gift className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">No loyalty data yet</h3>
+            <h3 className="text-xl font-semibold text-white mb-2">No loyalty data yet</h3>
             <p className="text-gray-500">Members will be tracked as they maintain subscriptions</p>
           </div>
         ) : (
@@ -282,7 +270,7 @@ export default function LoyaltyPage() {
                       {member.full_name?.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <h3 className="font-bold text-gray-900">{member.full_name}</h3>
+                      <h3 className="font-bold text-white">{member.full_name}</h3>
                       <p className="text-sm text-gray-500">{member.total_months} total months</p>
                     </div>
                   </div>
@@ -302,19 +290,19 @@ export default function LoyaltyPage() {
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-amber-50 rounded-xl p-3 text-center">
-                      <p className="text-2xl font-bold text-amber-600">{member.consecutive_months}</p>
-                      <p className="text-xs text-amber-700">Consecutive</p>
+                    <div className="glass-subtle rounded-xl p-3 text-center">
+                      <p className="text-2xl font-bold text-primary">{member.consecutive_months}</p>
+                      <p className="text-xs text-gray-400">Consecutive</p>
                     </div>
-                    <div className="bg-green-50 rounded-xl p-3 text-center">
-                      <p className="text-2xl font-bold text-green-600">{member.free_pt_months_earned}</p>
-                      <p className="text-xs text-green-700">Rewards Earned</p>
+                    <div className="glass-subtle rounded-xl p-3 text-center">
+                      <p className="text-2xl font-bold text-white">{member.free_pt_months_earned}</p>
+                      <p className="text-xs text-gray-400">Rewards Earned</p>
                     </div>
                   </div>
 
                   {member.free_pt_months_earned > member.free_pt_months_used && (
-                    <div className="mt-4 p-3 bg-amber-50 rounded-xl border border-amber-200">
-                      <div className="flex items-center gap-2 text-amber-700">
+                    <div className="mt-4 p-3 glass-subtle rounded-xl border border-primary/30">
+                      <div className="flex items-center gap-2 text-primary">
                         <Gift className="w-5 h-5" />
                         <span className="font-medium">
                           {member.free_pt_months_earned - member.free_pt_months_used} reward(s) available!
@@ -331,7 +319,7 @@ export default function LoyaltyPage() {
         filteredRewards.length === 0 ? (
           <div className="glass-card rounded-lg p-16 text-center">
             <Award className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">No rewards yet</h3>
+            <h3 className="text-xl font-semibold text-white mb-2">No rewards yet</h3>
             <p className="text-gray-500">Rewards will appear when members reach 12 consecutive months</p>
           </div>
         ) : (
@@ -340,19 +328,19 @@ export default function LoyaltyPage() {
               <div key={reward.id} className="glass-card rounded-lg shadow-sm hover:shadow-md transition-all p-5">
                 <div className="flex items-center gap-4">
                   {/* Icon */}
-                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${
-                    reward.is_claimed ? 'bg-green-100' : 'bg-amber-100'
+                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center glass-subtle ${
+                    reward.is_claimed ? 'text-primary' : 'text-primary'
                   }`}>
                     {reward.is_claimed ? (
-                      <CheckCircle className="w-7 h-7 text-green-600" />
+                      <CheckCircle className="w-7 h-7" />
                     ) : (
-                      <Gift className="w-7 h-7 text-amber-600" />
+                      <Gift className="w-7 h-7" />
                     )}
                   </div>
 
                   {/* Info */}
                   <div className="flex-1">
-                    <h3 className="font-bold text-gray-900">{reward.client_name}</h3>
+                    <h3 className="font-bold text-white">{reward.client_name}</h3>
                     <p className="text-sm text-gray-500">
                       Earned 1 FREE PT month after {reward.months_count} months
                     </p>
@@ -380,7 +368,7 @@ export default function LoyaltyPage() {
                       <CheckCircle className="w-4 h-4" /> Mark Claimed
                     </button>
                   ) : (
-                    <span className="px-4 py-2 bg-green-100 text-green-700 rounded-xl text-sm font-medium">
+                    <span className="px-4 py-2 glass-subtle text-primary rounded-xl text-sm font-medium">
                       Claimed
                     </span>
                   )}

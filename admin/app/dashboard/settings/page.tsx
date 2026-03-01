@@ -115,67 +115,73 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="glass-card rounded-lg p-16 flex flex-col items-center justify-center">
+        <Loader2 className="w-12 h-12 animate-spin text-primary mb-4" />
+        <p className="text-gray-500">Loading settings...</p>
       </div>
     )
   }
 
   return (
     <div className="space-y-6 max-w-3xl">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-          <p className="text-gray-500 mt-1">Manage your gym settings and preferences</p>
-        </div>
+      {/* Hero Header - matches Subscriptions */}
+      <div className="relative overflow-hidden rounded-lg glass-card p-8">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent-red/5" />
+        <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute -bottom-20 -left-20 h-60 w-60 rounded-full bg-accent-red/10 blur-3xl" />
+        <div className="relative z-10 flex items-center justify-between">
+          <div>
+            <h1 className="font-display text-2xl font-bold text-white tracking-wide">Settings</h1>
+            <p className="text-gray-400">Manage your gym settings and preferences</p>
+          </div>
         {saved && (
-          <div className="flex items-center gap-2 text-green-600">
+          <div className="flex items-center gap-2 text-primary">
             <CheckCircle className="w-5 h-5" />
             <span className="text-sm font-medium">Saved successfully!</span>
           </div>
         )}
+        </div>
       </div>
 
       {/* Gym Info */}
-      <div className="glass-card rounded-lg border border-white/10 p-6 border border-white/10">
-        <h2 className="font-semibold text-gray-900 mb-4">Gym Information</h2>
+      <div className="glass-card rounded-lg p-6 shadow-sm">
+        <h2 className="font-semibold text-white mb-4">Gym Information</h2>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Gym Name</label>
+            <label className="block text-sm font-medium text-gray-400 mb-1">Gym Name</label>
             <input
               type="text"
               value={formData.gym_name}
               onChange={(e) => setFormData(p => ({ ...p, gym_name: e.target.value }))}
-              className="w-full px-4 py-2 border border-slate-600/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="w-full px-4 py-3 glass-input border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+            <label className="block text-sm font-medium text-gray-400 mb-1">Address</label>
             <input
               type="text"
               value={formData.address}
               onChange={(e) => setFormData(p => ({ ...p, address: e.target.value }))}
-              className="w-full px-4 py-2 border border-slate-600/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="w-full px-4 py-3 glass-input border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+              <label className="block text-sm font-medium text-gray-400 mb-1">Phone</label>
               <input
                 type="text"
                 value={formData.phone}
                 onChange={(e) => setFormData(p => ({ ...p, phone: e.target.value }))}
-                className="w-full px-4 py-2 border border-slate-600/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
+                className="w-full px-4 py-3 glass-input border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <label className="block text-sm font-medium text-gray-400 mb-1">Email</label>
               <input
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData(p => ({ ...p, email: e.target.value }))}
-                className="w-full px-4 py-2 border border-slate-600/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
+                className="w-full px-4 py-3 glass-input border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
           </div>
@@ -183,30 +189,30 @@ export default function SettingsPage() {
       </div>
 
       {/* Pricing */}
-      <div className="glass-card rounded-lg border border-white/10 p-6 border border-white/10">
-        <h2 className="font-semibold text-gray-900 mb-4">Pricing</h2>
+      <div className="glass-card rounded-lg p-6 shadow-sm">
+        <h2 className="font-semibold text-white mb-4">Pricing</h2>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Open Gym (Monthly)</label>
+            <label className="block text-sm font-medium text-gray-400 mb-1">Open Gym (Monthly)</label>
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">$</span>
               <input
                 type="number"
                 value={formData.open_gym_price}
                 onChange={(e) => setFormData(p => ({ ...p, open_gym_price: parseInt(e.target.value) || 0 }))}
-                className="w-full pl-8 pr-4 py-2 border border-slate-600/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
+                className="w-full pl-8 pr-4 py-3 glass-input border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">PT Package (Monthly)</label>
+            <label className="block text-sm font-medium text-gray-400 mb-1">PT Package (Monthly)</label>
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">$</span>
               <input
                 type="number"
                 value={formData.pt_package_price}
                 onChange={(e) => setFormData(p => ({ ...p, pt_package_price: parseInt(e.target.value) || 0 }))}
-                className="w-full pl-8 pr-4 py-2 border border-slate-600/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
+                className="w-full pl-8 pr-4 py-3 glass-input border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
           </div>
@@ -214,24 +220,24 @@ export default function SettingsPage() {
       </div>
 
       {/* Operating Hours */}
-      <div className="glass-card rounded-lg border border-white/10 p-6 border border-white/10">
-        <h2 className="font-semibold text-gray-900 mb-4">Operating Hours</h2>
+      <div className="glass-card rounded-lg p-6 shadow-sm">
+        <h2 className="font-semibold text-white mb-4">Operating Hours</h2>
         <div className="space-y-3">
           {Object.entries(formData.operating_hours).map(([day, hours]) => (
             <div key={day} className="flex items-center gap-4">
-              <span className="w-24 text-sm text-gray-600 capitalize">{day}</span>
+              <span className="w-24 text-sm text-gray-400 capitalize">{day}</span>
               <input
                 type="time"
                 value={hours.open}
                 onChange={(e) => updateHours(day, 'open', e.target.value)}
-                className="px-3 py-2 border border-slate-600/50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                className="px-3 py-2 glass-input border-0 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
               <span className="text-gray-400">to</span>
               <input
                 type="time"
                 value={hours.close}
                 onChange={(e) => updateHours(day, 'close', e.target.value)}
-                className="px-3 py-2 border border-slate-600/50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                className="px-3 py-2 glass-input border-0 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
           ))}
@@ -242,7 +248,7 @@ export default function SettingsPage() {
       <button 
         onClick={handleSave}
         disabled={saving}
-        className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
+        className="flex items-center gap-2 px-6 py-3 glass-button text-white rounded-xl font-medium disabled:opacity-50"
       >
         {saving ? (
           <>

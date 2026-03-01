@@ -211,56 +211,51 @@ export default function BookingsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Hero Header - UFC/FIFA theme */}
-      <div className="relative overflow-hidden rounded-lg border border-white/10 bg-gradient-to-br from-surface-card via-surface-light to-surface-card p-8">
+      {/* Hero Header - matches Subscriptions */}
+      <div className="relative overflow-hidden rounded-lg glass-card p-8">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent-red/5" />
         <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-primary/10 blur-3xl" />
         <div className="absolute -bottom-20 -left-20 h-60 w-60 rounded-full bg-accent-red/10 blur-3xl" />
         <div className="relative z-10">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="p-4 bg-primary/20 border border-primary/40 rounded-lg">
-                <Calendar className="w-10 h-10 text-primary" />
-              </div>
-              <div>
-                <h1 className="font-display text-2xl font-bold text-white tracking-wide">Bookings</h1>
-                <p className="text-gray-400">Manage training sessions</p>
-              </div>
+            <div>
+              <h1 className="font-display text-2xl font-bold text-white tracking-wide">Bookings</h1>
+              <p className="text-gray-400">Manage training sessions</p>
             </div>
             <button
               onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded font-semibold hover:bg-primary-light transition-colors border border-primary/50"
+              className="flex items-center gap-2 px-6 py-3 glass-button text-white rounded font-semibold"
             >
               <Plus className="w-5 h-5" />
               New Booking
             </button>
           </div>
-          <div className="flex gap-6 mt-6">
+          <div className="flex gap-6 mt-8">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-white/5 rounded border border-slate-600/50">
+              <div className="p-2 glass-subtle rounded-lg">
                 <Calendar className="w-5 h-5 text-primary" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-white">{stats.total}</p>
-                <p className="text-xs text-gray-500">Total Today</p>
+                <p className="text-xs text-gray-400">Total Today</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-white/5 rounded border border-slate-600/50">
+              <div className="p-2 glass-subtle rounded-lg">
                 <CheckCircle className="w-5 h-5 text-primary" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-white">{stats.confirmed}</p>
-                <p className="text-xs text-gray-500">Confirmed</p>
+                <p className="text-xs text-gray-400">Confirmed</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-white/5 rounded border border-slate-600/50">
+              <div className="p-2 glass-subtle rounded-lg">
                 <AlertCircle className="w-5 h-5 text-primary" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-white">{stats.pending}</p>
-                <p className="text-xs text-gray-500">Pending</p>
+                <p className="text-xs text-gray-400">Pending</p>
               </div>
             </div>
           </div>
@@ -268,7 +263,7 @@ export default function BookingsPage() {
       </div>
 
       {/* Date Navigator & Search */}
-      <div className="glass-card rounded-lg p-4 border border-white/10">
+      <div className="glass-card rounded-lg p-4 shadow-sm">
         <div className="flex flex-wrap gap-4 items-center justify-between">
           <div className="relative flex-1 min-w-[220px] max-w-md">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -287,7 +282,7 @@ export default function BookingsPage() {
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
-            <div className="px-6 py-3 glass-input border border-slate-600/50 rounded">
+            <div className="px-6 py-3 glass-input border-0 rounded-xl">
               <input
                 type="date"
                 value={selectedDate}
@@ -312,7 +307,7 @@ export default function BookingsPage() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-4 py-3 glass-input border border-slate-600/50 rounded text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+            className="px-4 py-3 glass-input border-0 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
           >
             <option value="">All Status</option>
             <option value="pending">Pending</option>
@@ -325,18 +320,18 @@ export default function BookingsPage() {
 
       {/* Bookings List */}
       {loading ? (
-        <div className="glass-card rounded-lg p-16 flex flex-col items-center justify-center border border-white/10">
+        <div className="glass-card rounded-lg p-16 flex flex-col items-center justify-center">
           <Loader2 className="w-12 h-12 animate-spin text-primary mb-4" />
           <p className="text-gray-500">Loading bookings...</p>
         </div>
       ) : filteredBookings.length === 0 ? (
-        <div className="glass-card rounded-lg p-16 text-center border border-white/10">
-          <Calendar className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-300 mb-2">No bookings for this date</h3>
+        <div className="glass-card rounded-lg p-16 text-center">
+          <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-white mb-2">No bookings for this date</h3>
           <p className="text-gray-500 mb-6">Schedule a training session</p>
           <button
             onClick={() => setShowAddModal(true)}
-            className="px-6 py-3 bg-primary text-white rounded font-medium hover:bg-primary-light transition-colors border border-primary/50"
+            className="px-6 py-3 glass-button text-white rounded-xl font-medium"
           >
             Create Booking
           </button>
@@ -344,7 +339,7 @@ export default function BookingsPage() {
       ) : (
         <div className="space-y-3">
           {filteredBookings.map((booking) => (
-            <div key={booking.id} className="glass-card rounded-lg border border-white/10 hover:border-primary/30 transition-all p-5 card-hover">
+            <div key={booking.id} className="glass-card rounded-lg p-5 card-hover border border-white/10 hover:border-primary/30 transition-all">
               <div className="flex items-center gap-4">
                 {/* Time */}
                 <div className="w-28 text-center">

@@ -181,22 +181,17 @@ export default function AttendancePage() {
 
   return (
     <div className="space-y-6">
-      {/* Hero Header - UFC/FIFA theme */}
-      <div className="relative overflow-hidden rounded-lg border border-white/10 bg-gradient-to-br from-surface-card via-surface-light to-surface-card p-8">
+      {/* Hero Header - matches Subscriptions */}
+      <div className="relative overflow-hidden rounded-lg glass-card p-8">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent-red/5" />
         <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-primary/10 blur-3xl" />
         <div className="absolute -bottom-20 -left-20 h-60 w-60 rounded-full bg-accent-red/10 blur-3xl" />
         
         <div className="relative z-10">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="p-4 bg-primary/20 border border-primary/40 rounded-lg">
-                <ClipboardCheck className="w-10 h-10 text-primary" />
-              </div>
-              <div>
-                <h1 className="font-display text-2xl font-bold text-white tracking-wide">Attendance</h1>
-                <p className="text-gray-400">Track gym check-ins and visits</p>
-              </div>
+            <div>
+              <h1 className="font-display text-2xl font-bold text-white tracking-wide">Attendance</h1>
+              <p className="text-gray-400">Track gym check-ins and visits</p>
             </div>
           </div>
 
@@ -303,58 +298,53 @@ export default function AttendancePage() {
         filteredRecords.length === 0 ? (
           <div className="glass-card rounded-lg p-16 text-center">
             <ClipboardCheck className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">No check-ins for this date</h3>
+            <h3 className="text-xl font-semibold text-white mb-2">No check-ins for this date</h3>
             <p className="text-gray-500">Members will appear here when they check in</p>
           </div>
         ) : (
           <div className="glass-card rounded-lg shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="glass-input border-b border-gray-100">
+                <thead className="border-b border-white/10">
                   <tr>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Member</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Check In</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Check Out</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Duration</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Status</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-white">Member</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-white">Check In</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-white">Check Out</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-white">Duration</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-white">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-white/10">
                   {filteredRecords.map((record) => (
-                    <tr key={record.id} className="hover:glass-input transition-colors">
+                    <tr key={record.id} className="hover:bg-white/5 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-primary/30 border border-primary/40 text-primary flex items-center justify-center text-white font-bold">
-                            {record.full_name?.charAt(0).toUpperCase()}
+                          <div className="p-2 glass-subtle rounded-lg">
+                            <span className="font-bold text-primary">{record.full_name?.charAt(0).toUpperCase()}</span>
                           </div>
-                          <span className="font-medium text-gray-900">{record.full_name}</span>
+                          <span className="font-medium text-white">{record.full_name}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <LogIn className="w-4 h-4 text-green-500" />
-                          <span className="font-medium">{formatTime(record.check_in)}</span>
+                        <div className="flex items-center gap-2 text-gray-300">
+                          <LogIn className="w-4 h-4 text-green-400" />
+                          <span>{formatTime(record.check_in)}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <LogOut className="w-4 h-4 text-red-500" />
-                          <span className="font-medium">{formatTime(record.check_out)}</span>
+                        <div className="flex items-center gap-2 text-gray-300">
+                          <LogOut className="w-4 h-4 text-red-400" />
+                          <span>{formatTime(record.check_out)}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <Clock className="w-4 h-4 text-gray-400" />
-                          <span>{calculateDuration(record.check_in, record.check_out)}</span>
-                        </div>
-                      </td>
+                      <td className="px-6 py-4 text-gray-300">{calculateDuration(record.check_in, record.check_out)}</td>
                       <td className="px-6 py-4">
                         {record.check_out ? (
-                          <span className="px-3 py-1 bg-slate-700/50 text-gray-700 rounded-full text-sm font-medium">
+                          <span className="px-3 py-1 glass-subtle text-gray-300 rounded-full text-sm font-medium">
                             Completed
                           </span>
                         ) : (
-                          <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium animate-pulse">
+                          <span className="px-3 py-1 bg-primary/20 text-primary rounded-full text-sm font-medium animate-pulse">
                             In Gym
                           </span>
                         )}
@@ -369,27 +359,27 @@ export default function AttendancePage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredStats.map((member) => (
-            <div key={member.user_id} className="glass-card rounded-lg shadow-sm p-5 hover:shadow-md transition-all">
+            <div key={member.user_id} className="glass-card rounded-lg p-5 card-hover">
               <div className="flex items-center gap-4 mb-4">
-                <div className="w-14 h-14 rounded-2xl bg-primary/30 border border-primary/40 text-primary flex items-center justify-center text-white text-xl font-bold">
-                  {member.full_name.charAt(0).toUpperCase()}
+                <div className="p-2 glass-subtle rounded-lg">
+                  <span className="text-xl font-bold text-primary">{member.full_name.charAt(0).toUpperCase()}</span>
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-900">{member.full_name}</h3>
+                  <h3 className="font-bold text-white">{member.full_name}</h3>
                   {member.last_visit && (
-                    <p className="text-sm text-gray-500">Last visit: {new Date(member.last_visit).toLocaleDateString()}</p>
+                    <p className="text-sm text-gray-400">Last visit: {new Date(member.last_visit).toLocaleDateString()}</p>
                   )}
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-teal-50 rounded-xl p-4 text-center">
-                  <p className="text-3xl font-bold text-teal-600">{member.monthly_visits}</p>
-                  <p className="text-sm text-teal-700">This Month</p>
+                <div className="glass-subtle rounded-xl p-4 text-center">
+                  <p className="text-3xl font-bold text-primary">{member.monthly_visits}</p>
+                  <p className="text-sm text-gray-400">This Month</p>
                 </div>
-                <div className="bg-blue-50 rounded-xl p-4 text-center">
-                  <p className="text-3xl font-bold text-blue-600">{member.total_visits}</p>
-                  <p className="text-sm text-blue-700">All Time</p>
+                <div className="glass-subtle rounded-xl p-4 text-center">
+                  <p className="text-3xl font-bold text-white">{member.total_visits}</p>
+                  <p className="text-sm text-gray-400">All Time</p>
                 </div>
               </div>
             </div>

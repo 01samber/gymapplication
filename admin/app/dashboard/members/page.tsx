@@ -22,7 +22,8 @@ import {
   ChevronDown,
   UserCheck,
   Salad,
-  BadgeCheck
+  BadgeCheck,
+  KeyRound
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
@@ -140,6 +141,22 @@ export default function MembersPage() {
     }
   }
 
+  async function handleResetPassword(userId: string, fullName: string) {
+    try {
+      const res = await fetch('/api/reset-client-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to reset')
+      alert(`Password reset for ${fullName}. New temp password: ${data.tempPassword}\n\nShare this with the client. They must change it on first login.`)
+    } catch (error) {
+      console.error('Error:', error)
+      alert(error instanceof Error ? error.message : 'Failed to reset password')
+    }
+  }
+
   const q = searchQuery.trim().toLowerCase()
   const filteredMembers = members.filter(m => {
     const matchesSearch = !q ||
@@ -197,21 +214,16 @@ export default function MembersPage() {
 
   return (
     <div className="space-y-6">
-      {/* Hero Header - UFC/FIFA theme */}
-      <div className="relative overflow-hidden rounded-lg border border-white/10 bg-gradient-to-br from-surface-card via-surface-light to-surface-card p-8">
+      {/* Hero Header - matches Subscriptions page */}
+      <div className="relative overflow-hidden rounded-lg glass-card p-8">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent-red/5" />
         <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-primary/10 blur-3xl" />
         <div className="absolute -bottom-20 -left-20 h-60 w-60 rounded-full bg-accent-red/10 blur-3xl" />
         <div className="relative z-10">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="p-4 bg-primary/20 border border-primary/40 rounded-lg">
-                <Users className="w-10 h-10 text-primary" />
-              </div>
-              <div>
-                <h1 className="font-display text-2xl font-bold text-white tracking-wide">Members</h1>
-                <p className="text-gray-400">Manage your gym members</p>
-              </div>
+            <div>
+              <h1 className="font-display text-2xl font-bold text-white tracking-wide">Members</h1>
+              <p className="text-gray-400">Manage your gym members</p>
             </div>
             <button
               onClick={() => setShowAddModal(true)}
@@ -221,46 +233,46 @@ export default function MembersPage() {
               Add Member
             </button>
           </div>
-          <div className="flex gap-6 mt-6">
+          <div className="flex gap-6 mt-8">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-white/5 rounded border border-slate-600/50">
+              <div className="p-2 glass-subtle rounded-lg">
                 <Users className="w-5 h-5 text-primary" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-white">{members.length}</p>
-                <p className="text-xs text-gray-500">Total Members</p>
+                <p className="text-xs text-gray-400">Total Members</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-white/5 rounded border border-slate-600/50">
+              <div className="p-2 glass-subtle rounded-lg">
                 <Activity className="w-5 h-5 text-primary" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-white">{members.filter(m => m.fitness_goal).length}</p>
-                <p className="text-xs text-gray-500">Active Goals</p>
+                <p className="text-xs text-gray-400">Active Goals</p>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="glass-card rounded-lg p-4 border border-white/10">
+      {/* Filters - matches Subscriptions */}
+      <div className="glass-card rounded-lg p-4 shadow-sm">
         <div className="flex flex-wrap gap-4 items-center">
           <div className="relative flex-1 min-w-[250px]">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
               placeholder="Search members..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 glass-input rounded text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/50"
+              className="w-full pl-12 pr-4 py-3 glass-input border-0 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </div>
           <select
             value={filterGoal}
             onChange={(e) => setFilterGoal(e.target.value)}
-            className="px-4 py-3 glass-input rounded text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+            className="px-4 py-3 glass-input border-0 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
           >
             <option value="">All Goals</option>
             {fitnessGoals.map(goal => (
@@ -272,14 +284,14 @@ export default function MembersPage() {
 
       {/* Members Grid */}
       {loading ? (
-        <div className="glass-card rounded-lg p-16 flex flex-col items-center justify-center border border-white/10">
+        <div className="glass-card rounded-lg p-16 flex flex-col items-center justify-center">
           <Loader2 className="w-12 h-12 animate-spin text-primary mb-4" />
           <p className="text-gray-500">Loading members...</p>
         </div>
       ) : filteredMembers.length === 0 ? (
-        <div className="glass-card rounded-lg p-16 text-center border border-white/10">
-          <Users className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-300 mb-2">No members found</h3>
+        <div className="glass-card rounded-lg p-16 text-center">
+          <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-white mb-2">No members found</h3>
           <p className="text-gray-500 mb-6">Get started by adding your first member</p>
           <button
             onClick={() => setShowAddModal(true)}
@@ -296,6 +308,7 @@ export default function MembersPage() {
               member={member}
               onEdit={() => setEditingMember(member)}
               onDelete={() => handleDelete(member.id, member.user_id)}
+              onResetPassword={() => handleResetPassword(member.user_id, member.full_name)}
               getGoalLabel={getGoalLabel}
               getGoalColor={getGoalColor}
               getPlanLabel={getPlanLabel}
@@ -371,6 +384,12 @@ function MemberCard({ member, onEdit, onDelete, getGoalLabel, getGoalColor, getP
                   className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/5 flex items-center gap-2"
                 >
                   <Edit2 className="w-4 h-4" /> Edit
+                </button>
+                <button
+                  onClick={() => { setShowMenu(false); onResetPassword(); }}
+                  className="w-full px-4 py-2 text-left text-sm text-primary hover:bg-primary/10 flex items-center gap-2"
+                >
+                  <KeyRound className="w-4 h-4" /> Reset password
                 </button>
                 <button
                   onClick={() => { setShowMenu(false); onDelete(); }}

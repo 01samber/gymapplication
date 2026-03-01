@@ -123,24 +123,20 @@ export default function ExercisesPage() {
 
   return (
     <div className="space-y-6">
-      {/* Hero Header - UFC/FIFA theme */}
-      <div className="relative overflow-hidden rounded-lg border border-white/10 bg-gradient-to-br from-surface-card via-surface-light to-surface-card p-8">
+      {/* Hero Header - matches Subscriptions */}
+      <div className="relative overflow-hidden rounded-lg glass-card p-8">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent-red/5" />
         <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-primary/10 blur-3xl" />
         <div className="absolute -bottom-20 -left-20 h-60 w-60 rounded-full bg-accent-red/10 blur-3xl" />
         
         <div className="relative z-10">
-          <div className="flex items-center gap-4 mb-2">
-            <div className="p-4 bg-primary/20 border border-primary/40 rounded-lg">
-              <Dumbbell className="w-10 h-10 text-primary" />
-            </div>
+          <div className="flex items-center justify-between">
             <div>
               <h1 className="font-display text-2xl font-bold text-white tracking-wide">Exercise Library</h1>
               <p className="text-gray-400">Complete collection of gym exercises</p>
             </div>
           </div>
-          
-          <div className="flex gap-6 mt-6">
+          <div className="flex gap-6 mt-8">
             <div className="flex items-center gap-3">
               <div className="p-2 glass-subtle rounded-lg">
                 <Target className="w-5 h-5 text-primary" />
@@ -173,7 +169,7 @@ export default function ExercisesPage() {
       </div>
 
       {/* Filters */}
-      <div className="glass-card rounded-lg border border-white/10 p-4 border border-white/10 shadow-sm">
+      <div className="glass-card rounded-lg p-4 shadow-sm">
         <div className="flex flex-wrap gap-4 items-center">
           <div className="relative flex-1 min-w-[250px]">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -231,14 +227,14 @@ export default function ExercisesPage() {
 
       {/* Content */}
       {loading ? (
-        <div className="glass-card rounded-lg border border-white/10 p-16 flex flex-col items-center justify-center">
+        <div className="glass-card rounded-lg p-16 flex flex-col items-center justify-center">
           <Loader2 className="w-12 h-12 animate-spin text-primary mb-4" />
           <p className="text-gray-500">Loading exercise library...</p>
         </div>
       ) : filteredExercises.length === 0 ? (
-        <div className="glass-card rounded-lg border border-white/10 p-16 text-center">
-          <Dumbbell className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-700 mb-2">No exercises found</h3>
+        <div className="glass-card rounded-lg p-16 text-center">
+          <Dumbbell className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-white mb-2">No exercises found</h3>
           <p className="text-gray-500">Run the SQL migration to populate the exercise library.</p>
         </div>
       ) : viewMode === 'muscle' ? (
@@ -248,7 +244,7 @@ export default function ExercisesPage() {
             const isExpanded = expandedMuscle === muscle
 
             return (
-              <div key={muscle} className="glass-card rounded-lg border border-white/10 border border-white/10 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+              <div key={muscle} className="glass-card rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                 <div
                   className="cursor-pointer"
                   onClick={() => setExpandedMuscle(isExpanded ? null : muscle)}
@@ -260,7 +256,7 @@ export default function ExercisesPage() {
                     </div>
 
                     <div className="flex-1">
-                      <h2 className="text-xl font-bold text-gray-900 capitalize">
+                      <h2 className="text-xl font-bold text-white capitalize">
                         {muscleInfo.label}
                       </h2>
                       <div className="flex items-center gap-4 mt-1">
@@ -328,7 +324,7 @@ export default function ExercisesPage() {
                     </div>
 
                     <div className="flex-1">
-                      <h2 className="text-xl font-bold text-gray-900 capitalize">
+                      <h2 className="text-xl font-bold text-white capitalize">
                         {eqInfo.label}
                       </h2>
                       <div className="flex items-center gap-4 mt-1">
@@ -460,7 +456,7 @@ function ExerciseCard({ exercise, muscleInfo, onView, onToggle }: {
 
       {/* Content */}
       <div className="p-4">
-        <h3 className="font-bold text-gray-900 mb-1 line-clamp-1">{exercise.name}</h3>
+        <h3 className="font-bold text-white mb-1 line-clamp-1">{exercise.name}</h3>
         <p className="text-sm text-gray-500 line-clamp-2 mb-3 min-h-[40px]">
           {exercise.description || 'No description available'}
         </p>
@@ -568,7 +564,7 @@ function ExerciseViewModal({ exercise, onClose }: { exercise: Exercise; onClose:
 
           {exercise.instructions && exercise.instructions.length > 0 && (
             <div className="mt-8">
-              <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                 <div className="p-2 bg-primary/10 rounded-lg">
                   <Target className="w-5 h-5 text-primary" />
                 </div>
@@ -589,7 +585,7 @@ function ExerciseViewModal({ exercise, onClose }: { exercise: Exercise; onClose:
 
           {exercise.tips && exercise.tips.length > 0 && (
             <div className="mt-8">
-              <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                 <div className="p-2 bg-green-100 rounded-lg">
                   <Zap className="w-5 h-5 text-green-600" />
                 </div>

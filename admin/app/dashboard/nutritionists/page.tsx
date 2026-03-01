@@ -143,78 +143,74 @@ export default function NutritionistsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="relative overflow-hidden rounded-xl strength-card border border-primary/20 p-8 shadow-glow">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-accent-red/10" />
-        <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-primary/15 blur-3xl" />
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-24 bg-gradient-to-b from-primary to-primary/30 rounded-r" />
+      {/* Hero Header - matches Subscriptions */}
+      <div className="relative overflow-hidden rounded-lg glass-card p-8">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent-red/5" />
+        <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute -bottom-20 -left-20 h-60 w-60 rounded-full bg-accent-red/10 blur-3xl" />
         <div className="relative z-10">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="p-4 bg-primary/20 border border-primary/40 rounded-lg">
-                <Salad className="w-10 h-10 text-primary" />
-              </div>
-              <div>
-                <h1 className="font-display text-2xl font-bold text-white tracking-wide">Nutritionists</h1>
-                <p className="text-gray-400">Manage dietitians for Nutrition Plan & Premium clients</p>
-              </div>
+            <div>
+              <h1 className="font-display text-2xl font-bold text-white tracking-wide">Nutritionists</h1>
+              <p className="text-gray-400">Manage dietitians for Nutrition Plan & Premium clients</p>
             </div>
             <button
               onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded font-semibold hover:bg-primary-light transition-colors border border-primary/50"
+              className="flex items-center gap-2 px-6 py-3 glass-button text-white rounded font-semibold"
             >
               <UserPlus className="w-5 h-5" />
               Add Nutritionist
             </button>
           </div>
-          <div className="flex gap-4 mt-6 flex-wrap">
-            <div className="workout-stat">
-              <div className="p-2.5 bg-primary/20 rounded-lg border border-primary/30">
-                <Salad className="w-6 h-6 text-primary" />
+          <div className="flex gap-6 mt-8">
+            <div className="flex items-center gap-3">
+              <div className="p-2 glass-subtle rounded-lg">
+                <Salad className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-white tabular-nums">{nutritionists.length}</p>
-                <p className="text-xs text-gray-400 font-medium">Total Nutritionists</p>
+                <p className="text-2xl font-bold text-white">{nutritionists.length}</p>
+                <p className="text-xs text-gray-400">Total Nutritionists</p>
               </div>
             </div>
-            <div className="workout-stat">
-              <div className="p-2.5 bg-primary/20 rounded-lg border border-primary/30">
-                <Users className="w-6 h-6 text-primary" />
+            <div className="flex items-center gap-3">
+              <div className="p-2 glass-subtle rounded-lg">
+                <Users className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-white tabular-nums">{totalClients}</p>
-                <p className="text-xs text-gray-400 font-medium">Assigned Clients</p>
+                <p className="text-2xl font-bold text-white">{totalClients}</p>
+                <p className="text-xs text-gray-400">Assigned Clients</p>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="glass-card rounded-lg p-4 border border-white/10">
+      <div className="glass-card rounded-lg p-4 shadow-sm">
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           <input
             type="text"
             placeholder="Search nutritionists..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 glass-input border border-slate-600/50 rounded text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/50"
+            className="w-full pl-12 pr-4 py-3 glass-input border-0 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>
       </div>
 
       {loading ? (
-        <div className="glass-card rounded-lg p-16 flex flex-col items-center justify-center border border-white/10">
+        <div className="glass-card rounded-lg p-16 flex flex-col items-center justify-center">
           <Loader2 className="w-12 h-12 animate-spin text-primary mb-4" />
           <p className="text-gray-500">Loading nutritionists...</p>
         </div>
       ) : filteredNutritionists.length === 0 ? (
-        <div className="glass-card rounded-lg p-16 text-center border border-white/10">
-          <Salad className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-300 mb-2">No nutritionists found</h3>
+        <div className="glass-card rounded-lg p-16 text-center">
+          <Salad className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-white mb-2">No nutritionists found</h3>
           <p className="text-gray-500 mb-6">Add a nutritionist to assign them to clients with Nutrition Plan or Premium</p>
           <button
             onClick={() => setShowAddModal(true)}
-            className="px-6 py-3 bg-primary text-white rounded font-medium hover:bg-primary-light transition-colors border border-primary/50"
+            className="px-6 py-3 glass-button text-white rounded-xl font-medium"
           >
             Add First Nutritionist
           </button>

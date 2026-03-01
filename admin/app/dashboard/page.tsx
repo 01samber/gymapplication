@@ -2,24 +2,22 @@
 
 import { useEffect, useState } from 'react'
 import { 
-  Users, 
-  UserCog, 
+  Users01, 
+  User01, 
   Calendar, 
-  DollarSign, 
-  TrendingUp, 
-  TrendingDown,
+  CurrencyDollar, 
+  ArrowUp,
+  ArrowDown,
   Activity,
-  Clock,
-  Target,
+  Target01,
   Zap,
-  Award,
+  Award01,
   ArrowUpRight,
   ArrowDownRight,
-  Loader2,
-  CheckCircle2,
-  XCircle,
+  CheckCircle,
   AlertCircle
-} from 'lucide-react'
+} from '@untitled-ui/icons-react'
+import { Loader2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 type Stats = {
@@ -29,7 +27,6 @@ type Stats = {
   todayBookings: number
   monthlyRevenue: number
   todayCheckIns: number
-  pendingRequests: number
   loyaltyRewards: number
 }
 
@@ -51,7 +48,6 @@ export default function DashboardPage() {
     todayBookings: 0,
     monthlyRevenue: 0,
     todayCheckIns: 0,
-    pendingRequests: 0,
     loyaltyRewards: 0
   })
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([])
@@ -72,7 +68,6 @@ export default function DashboardPage() {
         bookingsRes,
         subscriptionsRes,
         attendanceRes,
-        requestsRes,
         loyaltyRes
       ] = await Promise.all([
         supabase.from('client_profiles').select('id, user_id', { count: 'exact' }),
@@ -80,7 +75,6 @@ export default function DashboardPage() {
         supabase.from('bookings').select('id', { count: 'exact' }).eq('scheduled_date', today),
         supabase.from('subscriptions').select('price_usd').eq('status', 'active'),
         supabase.from('attendance').select('id', { count: 'exact' }).gte('check_in', `${today}T00:00:00`).lt('check_in', `${today}T23:59:59`),
-        supabase.from('registration_requests').select('id', { count: 'exact' }).eq('status', 'pending'),
         supabase.from('loyalty_rewards').select('id', { count: 'exact' }).eq('status', 'pending')
       ])
 
@@ -93,7 +87,6 @@ export default function DashboardPage() {
         todayBookings: bookingsRes.count || 0,
         monthlyRevenue,
         todayCheckIns: attendanceRes.count || 0,
-        pendingRequests: requestsRes.count || 0,
         loyaltyRewards: loyaltyRes.count || 0
       })
 
@@ -159,14 +152,14 @@ export default function DashboardPage() {
         <StatCard
           title="Total Members"
           value={stats.totalMembers}
-          icon={Users}
+          icon={Users01}
           trend={12}
           color="blue"
         />
         <StatCard
           title="Active Trainers"
           value={stats.totalTrainers}
-          icon={UserCog}
+          icon={User01}
           trend={5}
           color="purple"
         />
@@ -180,7 +173,7 @@ export default function DashboardPage() {
         <StatCard
           title="Monthly Revenue"
           value={`$${stats.monthlyRevenue.toLocaleString()}`}
-          icon={DollarSign}
+          icon={CurrencyDollar}
           trend={18}
           color="orange"
         />
@@ -194,14 +187,9 @@ export default function DashboardPage() {
           icon={Activity}
         />
         <MiniStatCard
-          title="Pending Requests"
-          value={stats.pendingRequests}
-          icon={AlertCircle}
-        />
-        <MiniStatCard
           title="Loyalty Rewards"
           value={stats.loyaltyRewards}
-          icon={Award}
+          icon={Award01}
         />
         <MiniStatCard
           title="Active Sessions"
@@ -227,7 +215,7 @@ export default function DashboardPage() {
                     activity.status === 'warning' ? 'bg-accent-red/20 border border-accent-red/40' : 'bg-slate-600/30 border border-slate-500/50'
                   }`}>
                     {activity.status === 'success' ? (
-                      <CheckCircle2 className="w-5 h-5 text-primary" />
+                      <CheckCircle className="w-5 h-5 text-primary" />
                     ) : activity.status === 'warning' ? (
                       <AlertCircle className="w-5 h-5 text-accent-red" />
                     ) : (
@@ -260,7 +248,7 @@ export default function DashboardPage() {
           </div>
           <div className="p-4 space-y-3">
             <QuickActionButton
-              icon={Users}
+              icon={Users01}
               title="Add New Member"
               description="Register a new gym member"
               href="/dashboard/members"
@@ -272,13 +260,13 @@ export default function DashboardPage() {
               href="/dashboard/bookings"
             />
             <QuickActionButton
-              icon={UserCog}
+              icon={User01}
               title="Manage Trainers"
               description="View and edit trainers"
               href="/dashboard/trainers"
             />
             <QuickActionButton
-              icon={Target}
+              icon={Target01}
               title="View Reports"
               description="Analytics and insights"
               href="/dashboard/reports"
@@ -374,7 +362,7 @@ function MiniStatCard({ title, value, icon: Icon }: {
   icon: any
 }) {
   return (
-    <div className="rounded-lg border border-slate-700/50 bg-surface-card p-5 card-hover">
+    <div className="glass-card rounded-lg p-5 card-hover">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-3xl font-bold text-white">{value}</p>
@@ -422,7 +410,7 @@ function PerformanceMetric({ label, value, change, positive }: {
       <div className={`flex items-center justify-center gap-1 mt-2 text-sm font-medium ${
         positive ? 'text-primary' : 'text-red-400'
       }`}>
-        {positive ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+        {positive ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />}
         {change}%
       </div>
     </div>

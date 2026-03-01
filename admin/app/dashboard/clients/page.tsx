@@ -2,19 +2,19 @@
 
 import { useState, useEffect } from 'react'
 import { 
-  User, 
   Calendar, 
   Flame, 
   TrendingUp, 
   CheckCircle2, 
   Circle,
   PartyPopper,
-  Printer,
   ChevronLeft,
   ChevronRight,
   RefreshCw,
-  Search
+  Search,
+  Loader2
 } from 'lucide-react'
+import { Users01, Receipt, Package } from '@untitled-ui/icons-react'
 
 interface Client {
   id: string
@@ -215,62 +215,113 @@ export default function ClientsNutritionPage() {
     return { calories, protein, carbs, fat, mealCount: meals.length }
   }
 
+  const withPlans = clients.filter(c => c.subscription_plan === 'with_dietitian' || c.subscription_plan === 'premium').length
+  const premiumCount = clients.filter(c => c.subscription_plan === 'premium').length
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      <div className="space-y-6">
+        <div className="glass-card rounded-lg p-16 flex flex-col items-center justify-center">
+          <Loader2 className="w-12 h-12 animate-spin text-primary mb-4" />
+          <p className="text-gray-500">Loading clients...</p>
+        </div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="bg-red-500/10 text-red-400 p-4 rounded-lg">
-        Error: {error}
+      <div className="glass-card rounded-lg p-6">
+        <div className="bg-accent-red/20 border border-accent-red/40 text-accent-red-light px-4 py-3 rounded-lg text-sm">
+          Error: {error}
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-white mb-2">Client Nutrition & Body Data</h1>
-          <p className="text-slate-400 text-sm">Only clients on Nutrition Plan ($300/mo) or Premium Package ($550/mo) appear here. Deleted members are removed immediately.</p>
+    <div className="space-y-6">
+      {/* Hero Header - identical to Subscriptions */}
+      <div className="relative overflow-hidden rounded-lg glass-card p-8">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent-red/5" />
+        <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute -bottom-20 -left-20 h-60 w-60 rounded-full bg-accent-red/10 blur-3xl" />
+        <div className="relative z-10">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="font-display text-2xl font-bold text-white tracking-wide">Client Nutrition</h1>
+              <p className="text-gray-400">Only clients on Nutrition Plan ($300/mo) or Premium Package ($550/mo) appear here. Deleted members are removed immediately.</p>
+            </div>
+            <button
+              onClick={loadClients}
+              className="flex items-center gap-2 px-6 py-3 glass-button text-white rounded font-semibold"
+              title="Refresh client list"
+            >
+              <RefreshCw className="w-5 h-5" />
+              Refresh
+            </button>
+          </div>
+          <div className="flex gap-6 mt-8">
+            <div className="flex items-center gap-3">
+              <div className="p-2 glass-subtle rounded-lg">
+                <Users01 className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-white">{clients.length}</p>
+                <p className="text-xs text-gray-400">Total Clients</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="p-2 glass-subtle rounded-lg">
+                <Receipt className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-white">{withPlans}</p>
+                <p className="text-xs text-gray-400">With Nutrition Plan</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="p-2 glass-subtle rounded-lg">
+                <Package className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-white">{premiumCount}</p>
+                <p className="text-xs text-gray-400">Premium</p>
+              </div>
+            </div>
+          </div>
         </div>
-        <button
-          onClick={loadClients}
-          className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg flex items-center gap-2 text-sm transition-colors"
-          title="Refresh client list"
-        >
-          <RefreshCw className="w-4 h-4" />
-          Refresh
-        </button>
+      </div>
+
+      {/* Search bar - identical to Subscriptions */}
+      <div className="glass-card rounded-lg p-4 shadow-sm">
+        <div className="flex flex-wrap gap-4 items-center">
+          <div className="relative flex-1 min-w-[250px]">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search by client name or email..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 glass-input border-0 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+            />
+          </div>
+        </div>
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Client List */}
-        <div className="lg:col-span-1 glass-card rounded-xl p-4">
+        <div className="lg:col-span-1 glass-card rounded-lg p-4 overflow-hidden">
           <h2 className="text-lg font-semibold text-white mb-4">Clients</h2>
-          <div className="relative mb-4">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search clients..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-            />
-          </div>
           <div className="space-y-2 max-h-[500px] overflow-y-auto">
             {filteredClients.map(client => (
               <button
                 key={client.id}
                 onClick={() => setSelectedClient(client)}
-                className={`w-full text-left p-3 rounded-lg transition-colors ${
+                className={`w-full text-left p-3 rounded-xl transition-colors border ${
                   selectedClient?.id === client.id
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                    ? 'bg-primary/20 text-primary border-primary/40'
+                    : 'border-white/10 text-gray-300 hover:bg-white/5 hover:border-white/20'
                 }`}
               >
                 <p className="font-medium truncate">{client.full_name}</p>
@@ -278,7 +329,7 @@ export default function ClientsNutritionPage() {
               </button>
             ))}
             {filteredClients.length === 0 && (
-              <p className="text-slate-400 text-center py-4">
+              <p className="text-gray-400 text-center py-4">
                 {q ? 'No matching clients' : 'No clients found'}
               </p>
             )}
@@ -288,108 +339,114 @@ export default function ClientsNutritionPage() {
         {/* Client Details */}
         <div className="lg:col-span-3">
           {selectedClient ? (
-            <div className="glass-card rounded-xl p-6">
-              {/* Client Header */}
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-xl font-bold text-white">{selectedClient.full_name}</h2>
-                  <p className="text-slate-400">{selectedClient.email}</p>
+            <div className="glass-card rounded-lg overflow-hidden">
+              {/* Client Header - gradient like Subscriptions card */}
+              <div className="bg-gradient-to-r from-primary/30 to-accent-red/30 p-6 border-b border-white/10">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-bold text-white">{selectedClient.full_name}</h2>
+                    <p className="text-white/70 text-sm">{selectedClient.email}</p>
+                  </div>
+                  {selectedClient.subscription_plan && (
+                    <span className="px-3 py-1 bg-primary/20 text-primary rounded text-xs font-medium border border-primary/40">
+                      {selectedClient.subscription_plan}
+                    </span>
+                  )}
                 </div>
-                {selectedClient.subscription_plan && (
-                  <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm">
-                    {selectedClient.subscription_plan}
-                  </span>
-                )}
               </div>
 
-              {/* Tabs */}
-              <div className="flex gap-2 mb-6 border-b border-slate-700 pb-4 flex-wrap">
-                <button
-                  onClick={() => setActiveTab('body')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    activeTab === 'body'
-                      ? 'bg-teal-600 text-white'
-                      : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-                  }`}
-                >
-                  Body Composition
-                </button>
-                <button
-                  onClick={() => setActiveTab('diet')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    activeTab === 'diet'
-                      ? 'bg-green-600 text-white'
-                      : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-                  }`}
-                >
-                  Diet Plans
-                </button>
-                <button
-                  onClick={() => setActiveTab('commitment')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    activeTab === 'commitment'
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-                  }`}
-                >
-                  Commitment Tracking
-                </button>
-                <button
-                  onClick={() => setActiveTab('logs')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    activeTab === 'logs'
-                      ? 'bg-orange-600 text-white'
-                      : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-                  }`}
-                >
-                  Meal Logs
-                </button>
+              {/* Tabs - glass style */}
+              <div className="p-4 border-b border-white/10">
+                <div className="flex gap-2 flex-wrap">
+                  <button
+                    onClick={() => setActiveTab('body')}
+                    className={`px-4 py-2 rounded-xl font-medium transition-colors border ${
+                      activeTab === 'body'
+                        ? 'bg-primary/20 text-primary border-primary/40'
+                        : 'border-white/10 text-gray-400 hover:bg-white/5 hover:text-white'
+                    }`}
+                  >
+                    Body Composition
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('diet')}
+                    className={`px-4 py-2 rounded-xl font-medium transition-colors border ${
+                      activeTab === 'diet'
+                        ? 'bg-primary/20 text-primary border-primary/40'
+                        : 'border-white/10 text-gray-400 hover:bg-white/5 hover:text-white'
+                    }`}
+                  >
+                    Diet Plans
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('commitment')}
+                    className={`px-4 py-2 rounded-xl font-medium transition-colors border ${
+                      activeTab === 'commitment'
+                        ? 'bg-primary/20 text-primary border-primary/40'
+                        : 'border-white/10 text-gray-400 hover:bg-white/5 hover:text-white'
+                    }`}
+                  >
+                    Commitment Tracking
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('logs')}
+                    className={`px-4 py-2 rounded-xl font-medium transition-colors border ${
+                      activeTab === 'logs'
+                        ? 'bg-primary/20 text-primary border-primary/40'
+                        : 'border-white/10 text-gray-400 hover:bg-white/5 hover:text-white'
+                    }`}
+                  >
+                    Meal Logs
+                  </button>
+                </div>
               </div>
 
               {/* Tab Content */}
-              {dataLoading ? (
-                <div className="flex items-center justify-center h-48">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-                </div>
-              ) : (
-                <>
-                  {activeTab === 'body' && <BodyCompositionTab data={bodyCompositions} />}
-                  {activeTab === 'diet' && (
-                    <DietPlansTab 
-                      data={dietPlans} 
-                      selectedPlan={selectedPlan}
-                      setSelectedPlan={setSelectedPlan}
-                      selectedDay={selectedDay}
-                      setSelectedDay={setSelectedDay}
-                      getMealsForDay={getMealsForDay}
-                      isCheatDay={isCheatDay}
-                      calculateDayTotals={calculateDayTotals}
-                      getPlanDays={getPlanDays}
-                      getDateForDay={getDateForDay}
-                    />
-                  )}
-                  {activeTab === 'commitment' && (
-                    <CommitmentTrackingTab
-                      plans={dietPlans}
-                      selectedPlan={selectedPlan}
-                      setSelectedPlan={setSelectedPlan}
-                      commitments={commitments}
-                      dailyTracking={dailyTracking}
-                      getMealsForDay={getMealsForDay}
-                      isCheatDay={isCheatDay}
-                      getPlanDays={getPlanDays}
-                      getDateForDay={getDateForDay}
-                    />
-                  )}
-                  {activeTab === 'logs' && <MealLogsTab data={mealLogs} />}
-                </>
-              )}
+              <div className="p-6">
+                {dataLoading ? (
+                  <div className="flex items-center justify-center h-48">
+                    <Loader2 className="w-12 h-12 animate-spin text-primary" />
+                  </div>
+                ) : (
+                  <>
+                    {activeTab === 'body' && <BodyCompositionTab data={bodyCompositions} />}
+                    {activeTab === 'diet' && (
+                      <DietPlansTab 
+                        data={dietPlans} 
+                        selectedPlan={selectedPlan}
+                        setSelectedPlan={setSelectedPlan}
+                        selectedDay={selectedDay}
+                        setSelectedDay={setSelectedDay}
+                        getMealsForDay={getMealsForDay}
+                        isCheatDay={isCheatDay}
+                        calculateDayTotals={calculateDayTotals}
+                        getPlanDays={getPlanDays}
+                        getDateForDay={getDateForDay}
+                      />
+                    )}
+                    {activeTab === 'commitment' && (
+                      <CommitmentTrackingTab
+                        plans={dietPlans}
+                        selectedPlan={selectedPlan}
+                        setSelectedPlan={setSelectedPlan}
+                        commitments={commitments}
+                        dailyTracking={dailyTracking}
+                        getMealsForDay={getMealsForDay}
+                        isCheatDay={isCheatDay}
+                        getPlanDays={getPlanDays}
+                        getDateForDay={getDateForDay}
+                      />
+                    )}
+                    {activeTab === 'logs' && <MealLogsTab data={mealLogs} />}
+                  </>
+                )}
+              </div>
             </div>
           ) : (
-            <div className="glass-card rounded-xl p-12 text-center">
-              <div className="text-slate-400 text-6xl mb-4">👈</div>
-              <h3 className="text-xl font-medium text-white mb-2">Select a Client</h3>
-              <p className="text-slate-400">
+            <div className="glass-card rounded-lg p-16 text-center">
+              <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-white mb-2">Select a Client</h3>
+              <p className="text-gray-500">
                 Choose a client from the list to view their nutrition and body composition data.
               </p>
             </div>
@@ -404,10 +461,10 @@ export default function ClientsNutritionPage() {
 function BodyCompositionTab({ data }: { data: BodyComposition[] }) {
   if (data.length === 0) {
     return (
-      <div className="text-center py-12 text-slate-400">
+      <div className="glass-card rounded-lg p-16 text-center">
         <p className="text-5xl mb-4">📊</p>
-        <p>No body composition data available for this client.</p>
-        <p className="text-sm mt-2">Data will appear here once the dietitian adds measurements.</p>
+        <p className="text-white font-medium mb-2">No body composition data available for this client.</p>
+        <p className="text-gray-500 text-sm">Data will appear here once the dietitian adds measurements.</p>
       </div>
     )
   }
@@ -416,7 +473,7 @@ function BodyCompositionTab({ data }: { data: BodyComposition[] }) {
 
   return (
     <div className="space-y-6">
-      {/* Latest Stats */}
+      {/* Latest Stats - strength-card style like Subscriptions */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard 
           label="Weight" 
@@ -462,12 +519,14 @@ function BodyCompositionTab({ data }: { data: BodyComposition[] }) {
       </div>
 
       {/* History Table */}
-      <div>
-        <h3 className="text-lg font-medium text-white mb-4">Measurement History</h3>
+      <div className="glass-card rounded-lg overflow-hidden">
+        <div className="p-4 border-b border-white/10">
+          <h3 className="text-lg font-medium text-white">Measurement History</h3>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-slate-400 border-b border-slate-700">
+              <tr className="text-gray-400 border-b border-white/10">
                 <th className="text-left py-3 px-4">Date</th>
                 <th className="text-right py-3 px-4">Weight</th>
                 <th className="text-right py-3 px-4">BMI</th>
@@ -477,7 +536,7 @@ function BodyCompositionTab({ data }: { data: BodyComposition[] }) {
             </thead>
             <tbody>
               {data.map(comp => (
-                <tr key={comp.id} className="border-b border-slate-700/50 text-white">
+                <tr key={comp.id} className="border-b border-white/5 text-white hover:bg-white/5">
                   <td className="py-3 px-4">
                     {new Date(comp.measurement_date).toLocaleDateString()}
                   </td>
@@ -521,10 +580,10 @@ function DietPlansTab({
 }) {
   if (data.length === 0) {
     return (
-      <div className="text-center py-12 text-slate-400">
+      <div className="glass-card rounded-lg p-16 text-center">
         <p className="text-5xl mb-4">🥗</p>
-        <p>No diet plans available for this client.</p>
-        <p className="text-sm mt-2">The dietitian will create personalized plans.</p>
+        <p className="text-white font-medium mb-2">No diet plans available for this client.</p>
+        <p className="text-gray-500 text-sm">The dietitian will create personalized plans.</p>
       </div>
     )
   }
@@ -541,15 +600,15 @@ function DietPlansTab({
       {/* Plan Selector */}
       {data.length > 1 && (
         <div className="flex items-center gap-3 flex-wrap">
-          <span className="text-sm text-slate-400">Select Plan:</span>
+          <span className="text-sm text-gray-400">Select Plan:</span>
           {data.map(plan => (
             <button
               key={plan.id}
               onClick={() => { setSelectedPlan(plan); setSelectedDay(1); }}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-colors border ${
                 activePlan?.id === plan.id
-                  ? 'bg-green-600 text-white'
-                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                  ? 'bg-primary/20 text-primary border-primary/40'
+                  : 'border-white/10 text-gray-400 hover:bg-white/5'
               }`}
             >
               {plan.name} {plan.status === 'active' && '✓'}
@@ -558,51 +617,54 @@ function DietPlansTab({
         </div>
       )}
 
-      {/* Active Plan Header */}
-      <div className="bg-gradient-to-r from-green-900/30 to-emerald-900/20 rounded-xl p-5 border border-green-500/30">
+      {/* Active Plan Header - gradient like Subscriptions */}
+      <div className="rounded-xl overflow-hidden strength-card glass-card border border-primary/20">
+        <div className="h-2 bg-gradient-to-r from-primary/30 to-accent-red/30" />
+        <div className="p-5">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-lg font-bold text-white">{activePlan.name}</h3>
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-gray-400">
               {activePlan.plan_type === 'monthly' ? 'Monthly Plan' : 'Weekly Plan'} • 
               {new Date(activePlan.start_date).toLocaleDateString()} - {activePlan.end_date ? new Date(activePlan.end_date).toLocaleDateString() : 'Ongoing'}
             </p>
           </div>
-          <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+          <span className={`px-3 py-1 rounded text-xs font-medium border ${
             activePlan.status === 'active' 
-              ? 'bg-green-500/30 text-green-400' 
-              : 'bg-slate-500/30 text-slate-400'
+              ? 'bg-primary/20 text-primary border-primary/40' 
+              : 'bg-white/10 text-gray-400 border-white/10'
           }`}>
             {activePlan.status?.toUpperCase()}
           </span>
         </div>
         
         <div className="grid grid-cols-4 gap-4">
-          <div className="bg-black/20 rounded-lg p-3 text-center">
-            <p className="text-2xl font-bold text-orange-400">{activePlan.target_calories || 0}</p>
-            <p className="text-xs text-slate-400">Target Calories</p>
+          <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 text-center">
+            <p className="text-2xl font-bold text-primary">{activePlan.target_calories || 0}</p>
+            <p className="text-xs text-gray-400">Target Calories</p>
           </div>
-          <div className="bg-black/20 rounded-lg p-3 text-center">
-            <p className="text-2xl font-bold text-red-400">{activePlan.target_protein_g || 0}g</p>
-            <p className="text-xs text-slate-400">Protein</p>
+          <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 text-center">
+            <p className="text-2xl font-bold text-primary">{activePlan.target_protein_g || 0}g</p>
+            <p className="text-xs text-gray-400">Protein</p>
           </div>
-          <div className="bg-black/20 rounded-lg p-3 text-center">
-            <p className="text-2xl font-bold text-blue-400">{activePlan.target_carbs_g || 0}g</p>
-            <p className="text-xs text-slate-400">Carbs</p>
+          <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 text-center">
+            <p className="text-2xl font-bold text-primary">{activePlan.target_carbs_g || 0}g</p>
+            <p className="text-xs text-gray-400">Carbs</p>
           </div>
-          <div className="bg-black/20 rounded-lg p-3 text-center">
-            <p className="text-2xl font-bold text-yellow-400">{activePlan.target_fat_g || 0}g</p>
-            <p className="text-xs text-slate-400">Fat</p>
+          <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 text-center">
+            <p className="text-2xl font-bold text-primary">{activePlan.target_fat_g || 0}g</p>
+            <p className="text-xs text-gray-400">Fat</p>
           </div>
         </div>
 
         {activePlan.cheat_days && activePlan.cheat_days.length > 0 && (
-          <div className="mt-4 p-3 bg-amber-900/20 rounded-lg border border-amber-500/30">
+          <div className="mt-4 p-3 rounded-lg bg-amber-500/15 border border-amber-500/30">
             <p className="text-sm text-amber-400 font-medium">
               Cheat Days: {activePlan.cheat_days.map(d => new Date(d).toLocaleDateString()).join(', ')}
             </p>
           </div>
         )}
+        </div>
       </div>
 
       {/* Day Selector */}
@@ -612,14 +674,14 @@ function DietPlansTab({
           <button
             onClick={() => setSelectedDay(Math.max(1, selectedDay - 1))}
             disabled={selectedDay <= 1}
-            className="p-2 rounded-lg bg-slate-700 text-white disabled:opacity-50 hover:bg-slate-600"
+            className="p-2 rounded-xl glass-button text-white disabled:opacity-50"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           <select
             value={selectedDay}
             onChange={(e) => setSelectedDay(Number(e.target.value))}
-            className="bg-slate-700 text-white rounded-lg px-4 py-2 border border-slate-600"
+            className="glass-input text-white rounded-xl px-4 py-2"
           >
             {Array.from({ length: totalDays }, (_, i) => i + 1).map(day => {
               const date = getDateForDay(activePlan, day)
@@ -635,7 +697,7 @@ function DietPlansTab({
           <button
             onClick={() => setSelectedDay(Math.min(totalDays, selectedDay + 1))}
             disabled={selectedDay >= totalDays}
-            className="p-2 rounded-lg bg-slate-700 text-white disabled:opacity-50 hover:bg-slate-600"
+            className="p-2 rounded-xl glass-button text-white disabled:opacity-50"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -643,10 +705,10 @@ function DietPlansTab({
       </div>
 
       {/* Day Header */}
-      <div className={`p-4 rounded-xl ${dayIsCheat ? 'bg-amber-900/20 border border-amber-500/30' : 'bg-slate-700/50'}`}>
+      <div className={`p-4 rounded-xl ${dayIsCheat ? 'bg-amber-500/15 border border-amber-500/30' : 'glass-card border border-white/10'}`}>
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-slate-400" />
+            <Calendar className="w-5 h-5 text-gray-400" />
             <span className="text-white font-bold">
               Day {selectedDay} - {dayDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
             </span>
@@ -656,28 +718,28 @@ function DietPlansTab({
               </span>
             )}
           </div>
-          <div className="text-sm text-slate-400">
+          <div className="text-sm text-gray-400">
             {dayMeals.length} meals configured
           </div>
         </div>
 
         {/* Day Totals */}
         <div className="grid grid-cols-4 gap-3 mb-4">
-          <div className="bg-black/20 rounded-lg p-2 text-center">
-            <p className="text-lg font-bold text-orange-400">{dayTotals.calories}</p>
-            <p className="text-xs text-slate-400">kcal</p>
+          <div className="p-2 rounded-lg bg-primary/10 border border-primary/20 text-center">
+            <p className="text-lg font-bold text-primary">{dayTotals.calories}</p>
+            <p className="text-xs text-gray-400">kcal</p>
           </div>
-          <div className="bg-black/20 rounded-lg p-2 text-center">
-            <p className="text-lg font-bold text-red-400">{dayTotals.protein.toFixed(1)}g</p>
-            <p className="text-xs text-slate-400">Protein</p>
+          <div className="p-2 rounded-lg bg-primary/10 border border-primary/20 text-center">
+            <p className="text-lg font-bold text-primary">{dayTotals.protein.toFixed(1)}g</p>
+            <p className="text-xs text-gray-400">Protein</p>
           </div>
-          <div className="bg-black/20 rounded-lg p-2 text-center">
-            <p className="text-lg font-bold text-blue-400">{dayTotals.carbs.toFixed(1)}g</p>
-            <p className="text-xs text-slate-400">Carbs</p>
+          <div className="p-2 rounded-lg bg-primary/10 border border-primary/20 text-center">
+            <p className="text-lg font-bold text-primary">{dayTotals.carbs.toFixed(1)}g</p>
+            <p className="text-xs text-gray-400">Carbs</p>
           </div>
-          <div className="bg-black/20 rounded-lg p-2 text-center">
-            <p className="text-lg font-bold text-yellow-400">{dayTotals.fat.toFixed(1)}g</p>
-            <p className="text-xs text-slate-400">Fat</p>
+          <div className="p-2 rounded-lg bg-primary/10 border border-primary/20 text-center">
+            <p className="text-lg font-bold text-primary">{dayTotals.fat.toFixed(1)}g</p>
+            <p className="text-xs text-gray-400">Fat</p>
           </div>
         </div>
 
@@ -688,13 +750,13 @@ function DietPlansTab({
             const mealCals = meal?.items?.reduce((sum: number, item: any) => sum + (item.calories || 0), 0) || 0
             
             return (
-              <div key={mealType.value} className="bg-slate-800/50 rounded-lg p-4">
+              <div key={mealType.value} className="glass-card rounded-lg p-4 border border-white/10">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-3">
                     <span className="text-xl">{getMealEmoji(mealType.value)}</span>
                     <div>
                       <p className="text-white font-medium">{mealType.label}</p>
-                      <p className="text-xs text-slate-400">{meal?.scheduled_time || mealType.time}</p>
+                      <p className="text-xs text-gray-400">{meal?.scheduled_time || mealType.time}</p>
                     </div>
                   </div>
                   <span className="text-orange-400 font-bold">{mealCals} kcal</span>
@@ -705,8 +767,8 @@ function DietPlansTab({
                     {meal.items.map((item: any, idx: number) => {
                       const itemName = item.custom_item_name || item.food?.name || 'Custom Item'
                       return (
-                        <div key={idx} className="flex items-center justify-between text-sm bg-black/20 rounded-lg px-3 py-2">
-                          <span className="text-slate-300">
+                        <div key={idx} className="flex items-center justify-between text-sm rounded-lg px-3 py-2 bg-white/5 border border-white/5">
+                          <span className="text-gray-300">
                             {item.quantity} {item.unit || 'serving'} {itemName}
                           </span>
                           <div className="flex gap-3 text-xs">
@@ -720,7 +782,7 @@ function DietPlansTab({
                     })}
                   </div>
                 ) : (
-                  <p className="text-slate-500 text-sm mt-2">No items configured for this meal</p>
+                  <p className="text-gray-500 text-sm mt-2">No items configured for this meal</p>
                 )}
               </div>
             )
@@ -755,9 +817,9 @@ function CommitmentTrackingTab({
 }) {
   if (plans.length === 0) {
     return (
-      <div className="text-center py-12 text-slate-400">
+      <div className="glass-card rounded-lg p-16 text-center">
         <p className="text-5xl mb-4">📊</p>
-        <p>No diet plans available for commitment tracking.</p>
+        <p className="text-white font-medium">No diet plans available for commitment tracking.</p>
       </div>
     )
   }
@@ -793,15 +855,15 @@ function CommitmentTrackingTab({
       {/* Plan Selector */}
       {plans.length > 1 && (
         <div className="flex items-center gap-3 flex-wrap">
-          <span className="text-sm text-slate-400">Select Plan:</span>
+          <span className="text-sm text-gray-400">Select Plan:</span>
           {plans.map(plan => (
             <button
               key={plan.id}
               onClick={() => setSelectedPlan(plan)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-colors border ${
                 activePlan?.id === plan.id
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                  ? 'bg-primary/20 text-primary border-primary/40'
+                  : 'border-white/10 text-gray-400 hover:bg-white/5'
               }`}
             >
               {plan.name}
@@ -810,46 +872,46 @@ function CommitmentTrackingTab({
         </div>
       )}
 
-      {/* Stats Overview */}
+      {/* Stats Overview - glass style */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-gradient-to-br from-purple-900/30 to-purple-800/20 rounded-xl p-5 border border-purple-500/30">
+        <div className="glass-card rounded-xl p-5 border border-primary/20">
           <div className="flex items-center gap-3 mb-2">
-            <TrendingUp className="w-6 h-6 text-purple-400" />
-            <span className="text-sm text-slate-400">Overall Completion</span>
+            <TrendingUp className="w-6 h-6 text-primary" />
+            <span className="text-sm text-gray-400">Overall Completion</span>
           </div>
           <p className="text-3xl font-bold text-white">{completionRate}%</p>
-          <p className="text-xs text-slate-400 mt-1">{completedMeals} / {totalMealsPlanned} meals</p>
+          <p className="text-xs text-gray-400 mt-1">{completedMeals} / {totalMealsPlanned} meals</p>
         </div>
         
-        <div className="bg-gradient-to-br from-orange-900/30 to-orange-800/20 rounded-xl p-5 border border-orange-500/30">
+        <div className="glass-card rounded-xl p-5 border border-primary/20">
           <div className="flex items-center gap-3 mb-2">
-            <Flame className="w-6 h-6 text-orange-400" />
-            <span className="text-sm text-slate-400">Current Streak</span>
+            <Flame className="w-6 h-6 text-primary" />
+            <span className="text-sm text-gray-400">Current Streak</span>
           </div>
           <p className="text-3xl font-bold text-white">{currentStreak} days</p>
-          <p className="text-xs text-slate-400 mt-1">Keep it going!</p>
+          <p className="text-xs text-gray-400 mt-1">Keep it going!</p>
         </div>
 
-        <div className="bg-gradient-to-br from-green-900/30 to-green-800/20 rounded-xl p-5 border border-green-500/30">
+        <div className="glass-card rounded-xl p-5 border border-primary/20">
           <div className="flex items-center gap-3 mb-2">
-            <CheckCircle2 className="w-6 h-6 text-green-400" />
-            <span className="text-sm text-slate-400">Completed Days</span>
+            <CheckCircle2 className="w-6 h-6 text-primary" />
+            <span className="text-sm text-gray-400">Completed Days</span>
           </div>
           <p className="text-3xl font-bold text-white">
             {dailyTracking.filter(t => t.completion_percentage >= 80).length}
           </p>
-          <p className="text-xs text-slate-400 mt-1">of {totalDays} days</p>
+          <p className="text-xs text-gray-400 mt-1">of {totalDays} days</p>
         </div>
 
-        <div className="bg-gradient-to-br from-amber-900/30 to-amber-800/20 rounded-xl p-5 border border-amber-500/30">
+        <div className="glass-card rounded-xl p-5 border border-amber-500/30">
           <div className="flex items-center gap-3 mb-2">
             <PartyPopper className="w-6 h-6 text-amber-400" />
-            <span className="text-sm text-slate-400">Cheat Days Used</span>
+            <span className="text-sm text-gray-400">Cheat Days Used</span>
           </div>
           <p className="text-3xl font-bold text-white">
             {activePlan.cheat_days?.length || 0}
           </p>
-          <p className="text-xs text-slate-400 mt-1">designated cheat days</p>
+          <p className="text-xs text-gray-400 mt-1">designated cheat days</p>
         </div>
       </div>
 
@@ -873,26 +935,26 @@ function CommitmentTrackingTab({
                 key={day}
                 className={`rounded-lg p-3 text-center border transition-all ${
                   isCheat 
-                    ? 'bg-amber-900/20 border-amber-500/30'
+                    ? 'bg-amber-500/15 border-amber-500/30'
                     : completion >= 80
-                      ? 'bg-green-900/20 border-green-500/30'
+                      ? 'bg-primary/15 border-primary/30'
                       : completion > 0
-                        ? 'bg-blue-900/20 border-blue-500/30'
+                        ? 'bg-primary/10 border-primary/20'
                         : isPast
-                          ? 'bg-red-900/20 border-red-500/30'
-                          : 'bg-slate-800 border-slate-700'
-                } ${isToday ? 'ring-2 ring-white' : ''}`}
+                          ? 'bg-accent-red/15 border-accent-red/30'
+                          : 'glass-card border-white/10'
+                } ${isToday ? 'ring-2 ring-primary' : ''}`}
               >
-                <p className="text-xs text-slate-400">{DAYS_OF_WEEK[date.getDay()]}</p>
+                <p className="text-xs text-gray-400">{DAYS_OF_WEEK[date.getDay()]}</p>
                 <p className="text-sm font-bold text-white">{date.getDate()}</p>
                 {isCheat ? (
                   <PartyPopper className="w-4 h-4 text-amber-400 mx-auto mt-1" />
                 ) : completion >= 80 ? (
-                  <CheckCircle2 className="w-4 h-4 text-green-400 mx-auto mt-1" />
+                  <CheckCircle2 className="w-4 h-4 text-primary mx-auto mt-1" />
                 ) : (
-                  <Circle className="w-4 h-4 text-slate-600 mx-auto mt-1" />
+                  <Circle className="w-4 h-4 text-gray-600 mx-auto mt-1" />
                 )}
-                <p className="text-xs mt-1 text-slate-400">{completion}%</p>
+                <p className="text-xs mt-1 text-gray-400">{completion}%</p>
               </div>
             )
           })}
@@ -902,23 +964,23 @@ function CommitmentTrackingTab({
       {/* Recent Activity */}
       <div>
         <h4 className="text-md font-medium text-white mb-4">Recent Meal Commitments</h4>
-        {commitments.length === 0 ? (
-          <p className="text-slate-400 text-center py-8">No commitment data recorded yet.</p>
+            {commitments.length === 0 ? (
+          <p className="text-gray-400 text-center py-8">No commitment data recorded yet.</p>
         ) : (
           <div className="space-y-2 max-h-64 overflow-y-auto">
             {commitments.slice(0, 20).map((c, idx) => (
-              <div key={idx} className="flex items-center justify-between bg-slate-700/50 rounded-lg p-3">
+              <div key={idx} className="flex items-center justify-between glass-card rounded-lg p-3 border border-white/10">
                 <div className="flex items-center gap-3">
                   {c.is_committed ? (
-                    <CheckCircle2 className="w-5 h-5 text-green-400" />
+                    <CheckCircle2 className="w-5 h-5 text-primary" />
                   ) : (
-                    <Circle className="w-5 h-5 text-slate-500" />
+                    <Circle className="w-5 h-5 text-gray-500" />
                   )}
-                  <span className="text-slate-300">
+                  <span className="text-gray-300">
                     {new Date(c.commitment_date).toLocaleDateString()}
                   </span>
                 </div>
-                <span className={`text-sm ${c.is_committed ? 'text-green-400' : 'text-slate-500'}`}>
+                <span className={`text-sm ${c.is_committed ? 'text-primary' : 'text-gray-500'}`}>
                   {c.is_committed ? 'Completed' : 'Not completed'}
                 </span>
               </div>
@@ -934,10 +996,10 @@ function CommitmentTrackingTab({
 function MealLogsTab({ data }: { data: MealLog[] }) {
   if (data.length === 0) {
     return (
-      <div className="text-center py-12 text-slate-400">
+      <div className="glass-card rounded-lg p-16 text-center">
         <p className="text-5xl mb-4">📝</p>
-        <p>No meal logs in the past 7 days.</p>
-        <p className="text-sm mt-2">Logs will appear here when the client tracks their meals.</p>
+        <p className="text-white font-medium mb-2">No meal logs in the past 7 days.</p>
+        <p className="text-gray-500 text-sm">Logs will appear here when the client tracks their meals.</p>
       </div>
     )
   }
@@ -959,7 +1021,7 @@ function MealLogsTab({ data }: { data: MealLog[] }) {
         const totalFat = logs.reduce((sum, l) => sum + l.total_fat_g, 0)
 
         return (
-          <div key={date} className="bg-slate-700/50 rounded-xl p-4">
+          <div key={date} className="glass-card rounded-xl p-4 border border-white/10">
             <div className="flex items-center justify-between mb-4">
               <h4 className="font-bold text-white">
                 {new Date(date).toLocaleDateString('en-US', { 
@@ -977,12 +1039,12 @@ function MealLogsTab({ data }: { data: MealLog[] }) {
             </div>
             <div className="space-y-2">
               {logs.map(log => (
-                <div key={log.id} className="bg-black/20 rounded-lg p-3 flex justify-between items-center">
+                <div key={log.id} className="rounded-lg p-3 flex justify-between items-center bg-white/5 border border-white/5">
                   <div className="flex items-center gap-3">
                     <span className="text-lg">{getMealEmoji(log.meal_type)}</span>
-                    <p className="text-slate-300">{getMealTypeLabel(log.meal_type)}</p>
+                    <p className="text-gray-300">{getMealTypeLabel(log.meal_type)}</p>
                   </div>
-                  <p className="text-slate-400 text-sm">{log.total_calories} kcal</p>
+                  <p className="text-gray-400 text-sm">{log.total_calories} kcal</p>
                 </div>
               ))}
             </div>
@@ -1006,20 +1068,20 @@ function StatCard({
   subtitle?: string 
 }) {
   const colorClasses: Record<string, string> = {
-    blue: 'bg-blue-500/10 border-blue-500/30 text-blue-400',
-    green: 'bg-green-500/10 border-green-500/30 text-green-400',
-    orange: 'bg-orange-500/10 border-orange-500/30 text-orange-400',
-    purple: 'bg-purple-500/10 border-purple-500/30 text-purple-400',
-    cyan: 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400',
-    red: 'bg-red-500/10 border-red-500/30 text-red-400',
-    yellow: 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400',
+    blue: 'bg-primary/10 border-primary/30 text-primary',
+    green: 'bg-primary/10 border-primary/30 text-primary',
+    orange: 'bg-amber-500/15 border-amber-500/30 text-amber-400',
+    purple: 'bg-primary/10 border-primary/30 text-primary',
+    cyan: 'bg-primary/10 border-primary/30 text-primary',
+    red: 'bg-accent-red/20 border-accent-red/30 text-accent-red-light',
+    yellow: 'bg-amber-500/15 border-amber-500/30 text-amber-400',
   }
 
   return (
     <div className={`rounded-xl p-4 border ${colorClasses[color]}`}>
-      <p className="text-xs text-slate-400 mb-1">{label}</p>
-      <p className="text-2xl font-bold">{value}</p>
-      {subtitle && <p className="text-xs mt-1 opacity-70">{subtitle}</p>}
+      <p className="text-xs text-gray-400 mb-1">{label}</p>
+      <p className="text-2xl font-bold text-white">{value}</p>
+      {subtitle && <p className="text-xs mt-1 text-gray-400">{subtitle}</p>}
     </div>
   )
 }
