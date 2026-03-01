@@ -10,37 +10,36 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#8B7355', // Sepia - flipbook accent
-          dark: '#6B5D4F',
-          light: '#A08060',
-        },
-        secondary: {
-          DEFAULT: '#7D6E5D',
-          dark: '#5D5145',
-          light: '#9D8B75',
-        },
-        paper: {
-          DEFAULT: '#F5F0E6',
-          dark: '#E8E0D0',
-          light: '#FAF7F0',
-        },
-        ink: {
-          DEFAULT: '#3D3529',
-          muted: '#6B5D4F',
+          DEFAULT: '#00a651',
+          light: '#00c853',
+          dark: '#008c45',
         },
         accent: {
-          orange: '#D4A574',
-          red: '#B85C38',
-          blue: '#5B7A9E',
-          purple: '#8B7355',
+          red: '#c1272d',
+          'red-light': '#e63946',
         },
+        surface: {
+          dark: '#0a0a0a',
+          DEFAULT: '#0f0f0f',
+          light: '#141414',
+          card: '#1a1a1a',
+        },
+        paper: '#1a1a1a',
+        'paper-light': '#0f0f0f',
+        ink: '#e2e8f0',
+        'ink-muted': '#94a3b8',
       },
-      backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+      fontFamily: {
+        sans: ['var(--font-poppins)', 'system-ui', 'sans-serif'],
+        display: ['var(--font-cinzel)', 'Georgia', 'serif'],
+      },
+      boxShadow: {
+        'glow': '0 0 20px rgba(0, 166, 81, 0.2)',
+        'glow-red': '0 0 20px rgba(193, 39, 45, 0.2)',
       },
     },
   },
   plugins: [],
 }
+
 export default config

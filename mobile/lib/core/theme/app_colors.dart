@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 
-/// SweatBox color scheme
-/// White #FFFFFF, Black #000000, Dark Charcoal #0E0E0E, Accent Yellow #695910
+/// SweatBox color scheme - Dark glass UI (aligned with Admin/Dietitian web)
+/// Primary Green #00a651, Accent Red #c1272d, Dark surfaces
 class AppColors {
   AppColors._();
 
-  // SweatBox brand
-  static const Color white = Color(0xFFFFFFFF);      // Main lettering
-  static const Color black = Color(0xFF000000);      // Background, bold text
-  static const Color darkCharcoal = Color(0xFF0E0E0E); // Anti-alias, text smoothing
-  static const Color accentYellow = Color(0xFF695910); // Accent (e.g. "X")
+  // SweatBox brand - dark glass theme
+  static const Color white = Color(0xFFFFFFFF);
+  static const Color black = Color(0xFF000000);
+  static const Color darkCharcoal = Color(0xFF0A0A0B);
+  static const Color primaryGreen = Color(0xFF00A651);
+  static const Color accentRed = Color(0xFFC1272D);
 
   // Aliases for compatibility
-  static const Color primary = accentYellow;
-  static const Color primaryLight = Color(0xFF8B7510);
-  static const Color primaryDark = Color(0xFF4A3D0C);
+  static const Color primary = primaryGreen;
+  static const Color primaryLight = Color(0xFF00C853);
+  static const Color primaryDark = Color(0xFF008C45);
+  static const Color accentYellow = primaryGreen; // legacy alias
 
   static const Color secondary = darkCharcoal;
   static const Color secondaryLight = Color(0xFF1A1A1A);
@@ -23,7 +25,7 @@ class AppColors {
   static const Color success = Color(0xFF2ECC71);
   static const Color successLight = Color(0xFFD4EDDA);
   static const Color warning = accentYellow;
-  static const Color warningLight = Color(0x33695910);
+  static const Color warningLight = Color(0x3300A651);
   static const Color error = Color(0xFFE74C3C);
   static const Color errorLight = Color(0xFFF8D7DA);
   static const Color info = Color(0xFF3498DB);
@@ -53,7 +55,7 @@ class AppColors {
   ];
 
   static const LinearGradient primaryGradient = LinearGradient(
-    colors: [accentYellow, primaryLight],
+    colors: [primaryGreen, primaryLight],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -64,7 +66,7 @@ class AppColors {
     end: Alignment.bottomRight,
   );
 
-  static const Color bookingPending = accentYellow;
+  static const Color bookingPending = primaryGreen;
   static const Color bookingConfirmed = info;
   static const Color bookingCompleted = success;
   static const Color bookingCancelled = Color(0xFF95A5A6);

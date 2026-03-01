@@ -1,16 +1,17 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { 
-  Users, 
-  Utensils, 
-  Activity, 
-  TrendingUp,
-  Apple,
-  CheckCircle2,
+import Link from 'next/link'
+import {
+  Users01,
+  Receipt,
   Clock,
-  ChevronLeft
-} from 'lucide-react'
+  Activity,
+  CheckCircle,
+  ChevronRight,
+  Package,
+} from '@untitled-ui/icons-react'
+import { TrendingUp } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import FlipCard from '@/components/FlipCard'
 
@@ -88,27 +89,28 @@ export default function DashboardPage() {
   }, [])
 
   const statCards = [
-    { title: 'Total Clients', value: stats.totalClients, icon: Users, color: 'bg-amber-600/20 text-amber-700', link: '/dashboard/clients' },
-    { title: 'Active Plans', value: stats.activePlans, icon: Utensils, color: 'bg-primary/20 text-primary', link: '/dashboard/diet-plans' },
-    { title: 'Pending Reviews', value: stats.pendingLogs, icon: Clock, color: 'bg-amber-500/20 text-amber-600', link: '/dashboard/diet-plans' },
-    { title: 'Avg Compliance', value: `${stats.avgCompliance || 85}%`, icon: TrendingUp, color: 'bg-amber-700/20 text-amber-800', link: '/dashboard/clients' },
+    { title: 'Total Clients', value: stats.totalClients, icon: Users01, color: 'bg-primary/20 text-primary', link: '/dashboard/clients' },
+    { title: 'Active Plans', value: stats.activePlans, icon: Receipt, color: 'bg-primary/20 text-primary', link: '/dashboard/diet-plans' },
+    { title: 'Pending Reviews', value: stats.pendingLogs, icon: Clock, color: 'bg-amber-500/20 text-amber-400', link: '/dashboard/diet-plans' },
+    { title: 'Avg Compliance', value: `${stats.avgCompliance || 85}%`, icon: TrendingUp, color: 'bg-primary/20 text-primary', link: '/dashboard/clients' },
   ]
 
   return (
     <div className="space-y-6">
-      {/* Hero - book cover style */}
-      <div className="relative overflow-hidden rounded-2xl gradient-primary p-8 text-amber-50 paper-stack">
-        <div className="absolute inset-0 bg-gradient-to-br from-amber-900/20 to-transparent" />
-        <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-amber-400/10 blur-3xl" />
+      {/* Hero - dark glass */}
+      <div className="relative overflow-hidden rounded-lg glass-card p-8">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent-red/5" />
+        <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute -bottom-20 -left-20 h-60 w-60 rounded-full bg-accent-red/10 blur-3xl" />
         
         <div className="relative z-10">
           <div className="flex items-center gap-4">
-            <div className="p-4 bg-amber-600/30 rounded-2xl border border-amber-500/30">
-              <Activity className="w-10 h-10 text-amber-100" />
+            <div className="p-4 glass-subtle rounded-2xl border border-primary/30">
+              <Activity className="w-10 h-10 text-primary" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold">Welcome Back!</h1>
-              <p className="text-amber-100/90">Here&apos;s what&apos;s happening with your clients today.</p>
+              <h1 className="font-display text-3xl font-bold text-white tracking-wide">Welcome Back!</h1>
+              <p className="text-gray-400">Here&apos;s what&apos;s happening with your clients today.</p>
             </div>
           </div>
         </div>
@@ -116,65 +118,68 @@ export default function DashboardPage() {
 
       {/* Stats Grid - flip cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statCards.map((stat) => (
+        {statCards.map((stat) => {
+          const Icon = stat.icon
+          return (
           <FlipCard
             key={stat.title}
             front={
               <div className="flex items-start justify-between h-full">
                 <div>
-                  <p className="text-ink-muted text-sm font-medium">{stat.title}</p>
-                  <p className="text-3xl font-bold text-ink mt-2">{stat.value}</p>
+                  <p className="text-gray-400 text-sm font-medium">{stat.title}</p>
+                  <p className="text-3xl font-bold text-white mt-2">{stat.value}</p>
                 </div>
                 <div className={`p-3 rounded-xl ${stat.color}`}>
-                  <stat.icon className="w-6 h-6" />
+                  <Icon className="w-6 h-6" />
                 </div>
               </div>
             }
             back={
               <div className="flex flex-col justify-center h-full text-center">
-                <p className="text-ink-muted text-sm mb-3">View details</p>
-                <a
+                <p className="text-gray-400 text-sm mb-3">View details</p>
+                <Link
                   href={stat.link}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-primary/20 text-primary font-medium rounded-lg hover:bg-primary/30 transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2 glass-button text-white font-medium rounded-lg"
                 >
                   <span>Go</span>
-                  <ChevronLeft className="w-4 h-4 rotate-180" />
-                </a>
+                  <ChevronRight className="w-4 h-4" />
+                </Link>
               </div>
             }
-            className="card-hover"
+            className="card-hover rounded-xl"
           />
-        ))}
+          )
+        })}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Clients - page card */}
-        <div className="page-card paper-stack overflow-hidden">
-          <div className="p-6 border-b border-amber-900/10">
+        {/* Recent Clients - glass card */}
+        <div className="glass-card rounded-lg overflow-hidden">
+          <div className="p-6 border-b border-white/10">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-ink">Recent Clients</h2>
-              <a 
-                href="/dashboard/clients" 
-                className="text-sm text-primary hover:text-primary-dark font-medium transition-colors"
+              <h2 className="font-display text-lg font-semibold text-white">Recent Clients</h2>
+              <Link
+                href="/dashboard/clients"
+                className="text-sm text-primary hover:text-primary-light font-medium transition-colors"
               >
                 View All
-              </a>
+              </Link>
             </div>
           </div>
           <div className="p-6">
             {loading ? (
-              <div className="text-center py-8 text-ink-muted">Loading...</div>
+              <div className="text-center py-8 text-gray-400">Loading...</div>
             ) : recentClients.length === 0 ? (
               <div className="text-center py-8">
-                <Users className="w-12 h-12 text-amber-300 mx-auto mb-3" />
-                <p className="text-ink-muted">No clients assigned yet</p>
+                <Users01 className="w-12 h-12 text-gray-500 mx-auto mb-3" />
+                <p className="text-gray-400">No clients assigned yet</p>
               </div>
             ) : (
               <div className="space-y-4">
                 {recentClients.map((assignment) => (
-                  <div 
+                  <div
                     key={assignment.id}
-                    className="flex items-center gap-4 p-3 rounded-xl hover:bg-amber-900/5 transition-colors"
+                    className="flex items-center gap-4 p-3 rounded-xl hover:bg-white/5 transition-colors"
                   >
                     <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
                       <span className="text-sm font-semibold text-primary">
@@ -182,19 +187,19 @@ export default function DashboardPage() {
                       </span>
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium text-ink">
+                      <p className="font-medium text-white">
                         {assignment.client?.full_name || 'Unknown'}
                       </p>
-                      <p className="text-sm text-ink-muted">
+                      <p className="text-sm text-gray-400">
                         {assignment.client?.email || ''}
                       </p>
                     </div>
-                    <a 
+                    <Link
                       href={`/dashboard/clients/${assignment.client?.id}`}
-                      className="px-3 py-1 bg-primary/10 text-primary text-sm font-medium rounded-lg hover:bg-primary/20 transition-colors"
+                      className="px-3 py-1.5 glass-button text-primary text-sm font-medium rounded-lg"
                     >
                       View
-                    </a>
+                    </Link>
                   </div>
                 ))}
               </div>
@@ -202,40 +207,43 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Quick Actions - flip cards */}
-        <div className="page-card paper-stack overflow-hidden">
-          <div className="p-6 border-b border-amber-900/10">
-            <h2 className="text-lg font-semibold text-ink">Quick Actions</h2>
+        {/* Quick Actions */}
+        <div className="glass-card rounded-lg overflow-hidden">
+          <div className="p-6 border-b border-white/10">
+            <h2 className="font-display text-lg font-semibold text-white">Quick Actions</h2>
           </div>
           <div className="p-6 grid grid-cols-2 gap-4">
             {[
               { href: '/dashboard/body-analysis', icon: Activity, label: 'Add Body Analysis' },
-              { href: '/dashboard/diet-plans', icon: Utensils, label: 'Create Diet Plan' },
-              { href: '/dashboard/foods', icon: Apple, label: 'Add Food' },
-              { href: '/dashboard/clients', icon: Users, label: 'View Clients' },
-            ].map((action) => (
-              <a
-                key={action.label}
-                href={action.href}
-                className="p-4 rounded-xl border-2 border-dashed border-amber-900/20 hover:border-primary hover:bg-primary/5 transition-all text-center group"
-              >
-                <action.icon className="w-8 h-8 text-ink-muted group-hover:text-primary mx-auto mb-2" />
-                <p className="font-medium text-ink group-hover:text-primary text-sm">{action.label}</p>
-              </a>
-            ))}
+              { href: '/dashboard/diet-plans', icon: Receipt, label: 'Create Diet Plan' },
+              { href: '/dashboard/foods', icon: Package, label: 'Add Food' },
+              { href: '/dashboard/clients', icon: Users01, label: 'View Clients' },
+            ].map((action) => {
+              const Icon = action.icon
+              return (
+                <Link
+                  key={action.label}
+                  href={action.href}
+                  className="p-4 rounded-xl border border-white/10 hover:border-primary/40 hover:bg-primary/5 transition-all text-center group"
+                >
+                  <Icon className="w-8 h-8 text-gray-400 group-hover:text-primary mx-auto mb-2 transition-colors" />
+                  <p className="font-medium text-gray-300 group-hover:text-primary text-sm transition-colors">{action.label}</p>
+                </Link>
+              )
+            })}
           </div>
         </div>
       </div>
 
-      {/* Pro Tip - bookmark style */}
-      <div className="page-card p-6 border-l-4 border-primary bg-amber-50/50">
+      {/* Pro Tip - glass style */}
+      <div className="glass-card p-6 rounded-lg border-l-4 border-primary">
         <div className="flex items-start gap-4">
-          <div className="p-3 bg-primary/20 rounded-xl">
-            <CheckCircle2 className="w-6 h-6 text-primary" />
+          <div className="p-3 glass-subtle rounded-xl border border-primary/30">
+            <CheckCircle className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <h3 className="font-semibold text-ink">Pro Tip</h3>
-            <p className="text-ink-muted mt-1">
+            <h3 className="font-semibold text-white">Pro Tip</h3>
+            <p className="text-gray-400 mt-1">
               Review your clients&apos; meal logs daily to provide timely feedback and improve compliance rates.
               Regular check-ins help clients stay motivated and on track with their nutrition goals.
             </p>

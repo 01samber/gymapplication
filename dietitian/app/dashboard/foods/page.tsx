@@ -68,7 +68,7 @@ export default function FoodsPage() {
         50
       )
       if (data) {
-        setFoods(data)
+        setFoods(data as Food[])
       }
     } catch (error) {
       console.error('Error loading foods:', error)

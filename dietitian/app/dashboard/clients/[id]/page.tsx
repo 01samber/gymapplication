@@ -65,19 +65,19 @@ export default function ClientDetailPage() {
       }
 
       if (bodyRes.data) {
-        setBodyCompositions(bodyRes.data)
+        setBodyCompositions(bodyRes.data as BodyComposition[])
       }
 
       if (plansRes.data) {
-        setDietPlans(plansRes.data)
+        setDietPlans(plansRes.data as DietPlan[])
       }
 
       if (logsRes.data) {
-        setMealLogs(logsRes.data)
+        setMealLogs(logsRes.data as MealLog[])
         // Calculate compliance
-        const followed = logsRes.data.filter((l: MealLog) => l.status === 'followed').length
-        const modified = logsRes.data.filter((l: MealLog) => l.status === 'modified').length
-        const skipped = logsRes.data.filter((l: MealLog) => l.status === 'skipped').length
+        const followed = logsRes.data.filter((l: any) => l.status === 'followed').length
+        const modified = logsRes.data.filter((l: any) => l.status === 'modified').length
+        const skipped = logsRes.data.filter((l: any) => l.status === 'skipped').length
         const total = logsRes.data.length
         const percentage = total > 0 ? Math.round(((followed + modified * 0.5) / total) * 100) : 0
         setCompliance({ followed, modified, skipped, total, percentage })

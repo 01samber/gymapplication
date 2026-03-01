@@ -167,7 +167,7 @@ export default function DietPlansPage() {
     try {
       const { data } = await getClientDietPlans(selectedClient)
       if (data) {
-        setPlans(data)
+        setPlans(data as DietPlan[])
       }
     } catch (error) {
       console.error('Error loading plans:', error)
@@ -421,9 +421,9 @@ export default function DietPlansPage() {
 
       const { data: updatedPlans } = await getClientDietPlans(selectedClient)
       if (updatedPlans) {
-        setPlans(updatedPlans)
+        setPlans(updatedPlans as DietPlan[])
         const updated = updatedPlans.find(p => p.id === selectedPlan.id)
-        if (updated) setSelectedPlan(updated)
+        if (updated) setSelectedPlan(updated as DietPlan)
       }
       
       setShowAddMeal(false)
@@ -450,10 +450,10 @@ export default function DietPlansPage() {
       // Refresh plans and update selected plan
       const { data: updatedPlans } = await getClientDietPlans(selectedClient)
       if (updatedPlans) {
-        setPlans(updatedPlans)
+        setPlans(updatedPlans as DietPlan[])
         if (selectedPlan) {
           const updated = updatedPlans.find(p => p.id === selectedPlan.id)
-          if (updated) setSelectedPlan(updated)
+          if (updated) setSelectedPlan(updated as DietPlan)
         }
       }
     } catch (error) {
@@ -478,10 +478,10 @@ export default function DietPlansPage() {
       // Refresh plans and update selected plan
       const { data: updatedPlans } = await getClientDietPlans(selectedClient)
       if (updatedPlans) {
-        setPlans(updatedPlans)
+        setPlans(updatedPlans as DietPlan[])
         if (selectedPlan) {
           const updated = updatedPlans.find(p => p.id === selectedPlan.id)
-          if (updated) setSelectedPlan(updated)
+          if (updated) setSelectedPlan(updated as DietPlan)
         }
       }
     } catch (error) {
@@ -502,7 +502,7 @@ export default function DietPlansPage() {
     setSearchLoading(true)
     try {
       const { data } = await searchFoods(query)
-      if (data) setSearchResults(data)
+      if (data) setSearchResults(data as Food[])
     } catch (error) {
       console.error('Error searching foods:', error)
     } finally {
@@ -559,10 +559,10 @@ export default function DietPlansPage() {
 
       const { data: updatedPlans } = await getClientDietPlans(selectedClient)
       if (updatedPlans) {
-        setPlans(updatedPlans)
+        setPlans(updatedPlans as DietPlan[])
         if (selectedPlan) {
           const updated = updatedPlans.find(p => p.id === selectedPlan.id)
-          if (updated) setSelectedPlan(updated)
+          if (updated) setSelectedPlan(updated as DietPlan)
         }
       }
       
@@ -699,7 +699,7 @@ export default function DietPlansPage() {
       }).join('')
 
       // Get extra meals
-      const extraMeals = dayMeals.filter(m => m.meal_type === 'extra' || !MEAL_TYPES.find(t => t.value === m.meal_type))
+      const extraMeals = dayMeals.filter(m => (m.meal_type as string) === 'extra' || !MEAL_TYPES.find(t => t.value === m.meal_type))
       const extraMealsHtml = extraMeals.length > 0 ? `
         <div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed #fecaca;">
           <p style="font-size: 11px; color: #be123c; margin-bottom: 8px; font-weight: bold;">🎉 Extra/Cheat Meals:</p>
@@ -1122,7 +1122,7 @@ export default function DietPlansPage() {
                           
                           // Get extra meals (client added - not in standard meal types)
                           const standardMealTypes = MEAL_TYPES.map(m => m.value)
-                          const extraMeals = dayMeals.filter(m => !standardMealTypes.includes(m.meal_type) || m.meal_type === 'extra')
+                          const extraMeals = dayMeals.filter(m => !standardMealTypes.includes(m.meal_type as string) || (m.meal_type as string) === 'extra')
                           
                           return (
                             <>

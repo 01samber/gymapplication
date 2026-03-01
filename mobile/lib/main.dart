@@ -5,7 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/config/env_config.dart';
 import 'core/router/app_router.dart';
-import 'core/theme/app_theme.dart';
+import 'core/theme/fitness_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,8 +39,7 @@ class SweatBoxApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'SweatBox Gym',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
+      theme: FitnessTheme.darkTheme,
       themeMode: ThemeMode.dark,
       routerConfig: router,
     );

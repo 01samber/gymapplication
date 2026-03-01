@@ -133,6 +133,9 @@ export default function SubscriptionsPage() {
   ) {
     setRenewingId(id)
     try {
+      const sub = subscriptions.find(s => s.id === id)
+      if (!sub) throw new Error('Subscription not found')
+
       const end = new Date(currentEndDate)
       end.setMonth(end.getMonth() + 1)
       const newEndDate = end.toISOString().split('T')[0]
@@ -149,6 +152,44 @@ export default function SubscriptionsPage() {
         payment_method: paymentMethod,
         paid_at: new Date().toISOString()
       })
+
+      // Loyalty: update tracking and award free month at 12 paid months
+      const { data: lt } = await supabase
+        .from('loyalty_tracking')
+        .select('id, consecutive_months, total_months, free_pt_months_earned')
+        .eq('client_id', sub.client_id)
+        .single()
+
+      const newConsecutive = (lt?.consecutive_months ?? 0) + 1
+      const newTotal = (lt?.total_months ?? 0) + 1
+
+      const loyaltyUpsert: Record<string, unknown> = {
+        client_id: sub.client_id,
+        consecutive_months: newConsecutive >= 12 ? 0 : newConsecutive,
+        total_months: newTotal,
+        last_subscription_date: newEndDate,
+        current_streak_start: lt?.current_streak_start ?? new Date().toISOString().split('T')[0],
+        updated_at: new Date().toISOString(),
+      }
+
+      if (lt?.free_pt_months_earned != null) {
+        loyaltyUpsert.free_pt_months_earned = newConsecutive >= 12 ? (lt.free_pt_months_earned + 1) : lt.free_pt_months_earned
+      }
+
+      await supabase.from('loyalty_tracking').upsert(loyaltyUpsert, {
+        onConflict: 'client_id',
+        ignoreDuplicates: false,
+      })
+
+      // If they hit 12 months, create the reward record
+      if (newConsecutive >= 12) {
+        await supabase.from('client_loyalty_rewards').insert({
+          client_id: sub.client_id,
+          reward_type: 'free_month',
+          months_count: 12,
+          is_claimed: false,
+        })
+      }
 
       setRenewSub(null)
       fetchSubscriptions()
@@ -521,15 +562,35 @@ function SubscriptionFormModal({ clients, onClose, onSuccess }: {
     e.preventDefault()
     setLoading(true)
     try {
-      const { error } = await supabase.from('subscriptions').upsert({
+      const { data: subData, error } = await supabase.from('subscriptions').upsert({
         client_id: form.client_id,
         subscription_type: planConfig.subscriptionType,
         start_date: form.start_date,
         end_date: form.end_date,
         price_usd: planConfig.price,
         status: 'active'
-      }, { onConflict: 'client_id' })
+      }, { onConflict: 'client_id' }).select('id').single()
       if (error) throw error
+
+      // Record first month payment so loyalty sync counts it
+      if (subData?.id) {
+        await supabase.from('subscription_payments').insert({
+          subscription_id: subData.id,
+          amount_usd: planConfig.price,
+          payment_method: 'other',
+          paid_at: new Date().toISOString()
+        })
+      }
+
+      // Start loyalty tracking for new client
+      await supabase.from('loyalty_tracking').upsert({
+        client_id: form.client_id,
+        consecutive_months: 1,
+        total_months: 1,
+        last_subscription_date: form.end_date,
+        current_streak_start: form.start_date,
+      }, { onConflict: 'client_id', ignoreDuplicates: true })
+
       onSuccess()
     } catch (error: any) {
       console.error('Error:', error)

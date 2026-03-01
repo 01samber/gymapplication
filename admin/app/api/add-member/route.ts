@@ -118,12 +118,11 @@ export async function POST(req: NextRequest) {
       status: 'active',
       start_date: now.toISOString().split('T')[0],
       end_date: endDate.toISOString().split('T')[0],
+      subscription_type: planConfig.subscriptionType,
+      price_usd: planConfig.price,
     }
 
-    const { error: subError } = await adminClient.from('subscriptions').insert({
-      ...subPayload,
-      subscription_type: planConfig.subscriptionType,
-    })
+    const { error: subError } = await adminClient.from('subscriptions').insert(subPayload)
 
     if (subError) {
       await adminClient.auth.admin.deleteUser(userId)

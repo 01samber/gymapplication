@@ -142,7 +142,7 @@ export default function BodyAnalysisPage() {
     try {
       const { data } = await getClientBodyHistory(selectedClient)
       if (data) {
-        setCompositions(data)
+        setCompositions(data as BodyComposition[])
       }
     } catch (error) {
       console.error('Error loading body compositions:', error)

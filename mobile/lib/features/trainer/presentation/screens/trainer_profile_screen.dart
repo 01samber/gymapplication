@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/fitness_theme.dart';
 import '../../../auth/providers/auth_provider.dart';
 
-/// Trainer profile screen
+/// Trainer profile - fitness app style
 class TrainerProfileScreen extends ConsumerWidget {
   const TrainerProfileScreen({super.key});
 
@@ -15,15 +15,24 @@ class TrainerProfileScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
+        backgroundColor: FitnessColors.black,
+        elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings_outlined),
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: FitnessColors.blackCard,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(Icons.settings_outlined, size: 22, color: FitnessColors.gray),
+            ),
             onPressed: () {},
           ),
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         child: Column(
           children: [
             // Profile header
@@ -51,12 +60,12 @@ class TrainerProfileScreen extends ConsumerWidget {
     return Column(
       children: [
         CircleAvatar(
-          radius: 50,
-          backgroundColor: AppColors.secondary.withOpacity(0.1),
+          radius: 52,
+          backgroundColor: FitnessColors.primaryColor1.withOpacity(0.2),
           child: Text(
             'AK',
             style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                  color: AppColors.secondary,
+                  color: FitnessColors.primaryColor1,
                   fontWeight: FontWeight.bold,
                 ),
           ),
@@ -66,31 +75,33 @@ class TrainerProfileScreen extends ConsumerWidget {
           'Coach Ahmad Khalil',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
+                color: FitnessColors.white,
               ),
         ),
         const SizedBox(height: 4),
         Text(
           'Strength & Conditioning Specialist',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
+                color: FitnessColors.gray,
               ),
         ),
         const SizedBox(height: 8),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.star, color: AppColors.warning, size: 18),
+            Icon(Icons.star_rounded, color: FitnessColors.primaryColor1, size: 20),
             const SizedBox(width: 4),
             Text(
               '4.9',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
+                    color: FitnessColors.white,
                   ),
             ),
             Text(
               ' (127 reviews)',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
+                    color: FitnessColors.gray,
                   ),
             ),
           ],
@@ -106,52 +117,60 @@ class TrainerProfileScreen extends ConsumerWidget {
   }
 
   Widget _buildStatsRow(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.secondary,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildStat(context, '12', 'Active\nClients'),
-          _buildStatDivider(),
-          _buildStat(context, '324', 'Total\nSessions'),
-          _buildStatDivider(),
-          _buildStat(context, '5', 'Years\nExp.'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStat(BuildContext context, String value, String label) {
-    return Column(
+    return Row(
       children: [
-        Text(
-          value,
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.white.withOpacity(0.8),
-              ),
-        ),
+        Expanded(child: _statCard(context, Icons.people, '12', 'Active Clients')),
+        const SizedBox(width: 12),
+        Expanded(child: _statCard(context, Icons.event_available, '324', 'Total Sessions')),
+        const SizedBox(width: 12),
+        Expanded(child: _statCard(context, Icons.work_history, '5', 'Years Exp.')),
       ],
     );
   }
 
-  Widget _buildStatDivider() {
+  Widget _statCard(BuildContext context, IconData icon, String value, String label) {
     return Container(
-      width: 1,
-      height: 40,
-      color: Colors.white.withOpacity(0.3),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: FitnessColors.blackCard,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: FitnessColors.green.withOpacity(0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              gradient: FitnessColors.primaryGradient,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: FitnessColors.white, size: 20),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: FitnessColors.white,
+                ),
+          ),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: FitnessColors.gray,
+                  fontSize: 11,
+                ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -167,9 +186,16 @@ class TrainerProfileScreen extends ConsumerWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: FitnessColors.blackCard,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: FitnessColors.green.withOpacity(0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         children: menuItems.asMap().entries.map((entry) {
@@ -183,25 +209,31 @@ class TrainerProfileScreen extends ConsumerWidget {
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: AppColors.secondary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
+                    color: FitnessColors.primaryColor1.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
                     item['icon'] as IconData,
-                    color: AppColors.secondary,
+                    color: FitnessColors.primaryColor1,
                     size: 20,
                   ),
                 ),
-                title: Text(item['title'] as String),
-                trailing: const Icon(Icons.chevron_right),
+                title: Text(
+                  item['title'] as String,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: FitnessColors.white,
+                        fontWeight: FontWeight.w500,
+                      ),
+                ),
+                trailing: Icon(Icons.chevron_right, color: FitnessColors.grayLight),
                 onTap: () {},
               ),
               if (!isLast)
-                const Divider(
+                Divider(
                   height: 1,
                   indent: 56,
                   endIndent: 16,
-                  color: AppColors.divider,
+                  color: FitnessColors.gray.withOpacity(0.3),
                 ),
             ],
           );
@@ -231,7 +263,7 @@ class TrainerProfileScreen extends ConsumerWidget {
                     ref.read(authNotifierProvider.notifier).signOut();
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.error,
+                    backgroundColor: FitnessColors.secondaryColor1,
                   ),
                   child: const Text('Log Out'),
                 ),
@@ -240,8 +272,8 @@ class TrainerProfileScreen extends ConsumerWidget {
           );
         },
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.error,
-          side: const BorderSide(color: AppColors.error),
+          foregroundColor: FitnessColors.secondaryColor1,
+          side: const BorderSide(color: FitnessColors.secondaryColor1),
           padding: const EdgeInsets.symmetric(vertical: 14),
         ),
         icon: const Icon(Icons.logout),

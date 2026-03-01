@@ -2,24 +2,15 @@
 
 import { usePathname, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import {
-  LayoutDashboard,
-  Users,
-  Activity,
-  Utensils,
-  Apple,
-  LogOut,
-  BookOpen,
-  ChevronRight
-} from 'lucide-react'
+import { Home01, Users01, Activity, Receipt, Package, LogOut01, ChevronRight } from '@untitled-ui/icons-react'
 import { cn } from '@/lib/utils'
 
 const menuItems = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'My Clients', href: '/dashboard/clients', icon: Users },
+  { name: 'Dashboard', href: '/dashboard', icon: Home01 },
+  { name: 'My Clients', href: '/dashboard/clients', icon: Users01 },
   { name: 'Body Analysis', href: '/dashboard/body-analysis', icon: Activity },
-  { name: 'Diet Plans', href: '/dashboard/diet-plans', icon: Utensils },
-  { name: 'Food Database', href: '/dashboard/foods', icon: Apple },
+  { name: 'Diet Plans', href: '/dashboard/diet-plans', icon: Receipt },
+  { name: 'Food Database', href: '/dashboard/foods', icon: Package },
 ]
 
 export default function Sidebar() {
@@ -32,21 +23,19 @@ export default function Sidebar() {
   }
 
   return (
-    <div className="w-64 flipbook-binding min-h-screen flex flex-col paper-stack">
-      {/* Logo - book spine style */}
-      <div className="p-6 border-b border-amber-900/20">
+    <div className="w-64 glass-card min-h-screen flex flex-col border-r border-white/10">
+      <div className="p-6 border-b border-white/10">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-amber-700/30 rounded-xl border border-amber-600/30">
-            <BookOpen className="w-6 h-6 text-amber-200" />
+          <div className="p-2 bg-primary/20 rounded-xl border border-primary/40">
+            <Activity className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-amber-50">SweatBox</h1>
-            <p className="text-xs text-amber-200/70">Nutrition Portal</p>
+            <h1 className="text-lg font-bold text-white">SweatBox</h1>
+            <p className="text-xs text-gray-400">Nutrition Portal</p>
           </div>
         </div>
       </div>
 
-      {/* Navigation - page tabs style */}
       <nav className="flex-1 p-4">
         <ul className="space-y-1">
           {menuItems.map((item) => {
@@ -61,8 +50,8 @@ export default function Sidebar() {
                   className={cn(
                     'flex items-center gap-3 px-4 py-3 rounded-lg transition-all',
                     isActive
-                      ? 'bg-amber-700/40 text-amber-50 border-l-2 border-amber-400'
-                      : 'text-amber-100/80 hover:bg-amber-800/30 hover:text-amber-50'
+                      ? 'bg-primary/20 text-primary border-l-2 border-primary'
+                      : 'text-gray-400 hover:bg-white/5 hover:text-white'
                   )}
                 >
                   <Icon className="w-5 h-5" />
@@ -75,13 +64,13 @@ export default function Sidebar() {
         </ul>
       </nav>
 
-      <div className="p-4 border-t border-amber-900/20">
+      <div className="p-4 border-t border-white/10">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-4 py-3 w-full text-amber-100/80 hover:text-amber-50 hover:bg-amber-800/30 rounded-lg transition-all"
+          className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-gray-400 hover:bg-accent-red/10 hover:text-accent-red-light transition-colors"
         >
-          <LogOut className="w-5 h-5" />
-          <span className="font-medium">Sign Out</span>
+          <LogOut01 className="w-5 h-5" />
+          <span className="font-medium">Log out</span>
         </button>
       </div>
     </div>

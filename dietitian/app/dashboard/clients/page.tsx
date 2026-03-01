@@ -1,20 +1,18 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { 
-  Users, 
-  Search, 
+  Users01, 
+  SearchMd, 
   Activity,
-  Utensils,
-  TrendingUp,
+  Receipt,
   ChevronRight,
-  Loader2,
-  Eye,
-  UserPlus,
-  X
-} from 'lucide-react'
+  UserPlus01,
+  XClose
+} from '@untitled-ui/icons-react'
+import { Loader2, Eye } from 'lucide-react'
 import FlipCard from '@/components/FlipCard'
 import { supabase } from '@/lib/supabase'
 import { formatDate, calculateAge } from '@/lib/utils'
@@ -37,83 +35,86 @@ export default function ClientsPage() {
     if (q) setSearchQuery(q)
   }, [searchParams])
 
+  const loadClients = useCallback(async () => {
+    try {
+      setLoading(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        setLoading(false)
+        return
+      }
+
+      const { data: assignments, error } = await supabase
+        .from('client_dietitian_assignments')
+        .select(`
+          id,
+          assigned_at,
+          notes,
+          client:client_id(
+            id,
+            email,
+            full_name,
+            phone,
+            gender,
+            date_of_birth
+          )
+        `)
+        .eq('dietitian_id', user.id)
+        .eq('is_active', true)
+
+      if (error) {
+        console.error('Error fetching clients:', error)
+        setLoading(false)
+        return
+      }
+
+      // Show all assigned clients: gym clients (Nutrition/Premium) + dietitian-added clients (no subscription)
+      if (assignments && assignments.length > 0) {
+        const validAssignments = assignments.filter((a: any) => a.client?.id)
+        const clientsWithSummaries = await Promise.all(
+          validAssignments.map(async (assignment: any) => {
+            // Get latest body composition
+            const { data: latestBody } = await supabase
+              .from('body_compositions')
+              .select('weight_kg, bmi')
+              .eq('client_id', assignment.client?.id)
+              .order('measurement_date', { ascending: false })
+              .limit(1)
+              .single()
+
+            // Get active diet plan
+            const { data: activePlan } = await supabase
+              .from('diet_plans')
+              .select('id, name, status')
+              .eq('client_id', assignment.client?.id)
+              .eq('status', 'active')
+              .limit(1)
+              .single()
+
+            return {
+              id: assignment.id,
+              client: assignment.client,
+              summary: {
+                latestBodyComposition: latestBody,
+                activeDietPlan: activePlan,
+                weeklyCompliance: 0
+              }
+            }
+          })
+        )
+        setClients(clientsWithSummaries)
+      } else {
+        setClients([])
+      }
+    } catch (error) {
+      console.error('Error loading clients:', error)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
   useEffect(() => {
     let channel: ReturnType<typeof supabase.channel> | null = null
-
-    async function loadClients() {
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) {
-          setLoading(false)
-          return
-        }
-
-        const { data: assignments, error } = await supabase
-          .from('client_dietitian_assignments')
-          .select(`
-            id,
-            assigned_at,
-            notes,
-            client:client_id(
-              id,
-              email,
-              full_name,
-              phone,
-              gender,
-              date_of_birth
-            )
-          `)
-          .eq('dietitian_id', user.id)
-          .eq('is_active', true)
-
-        if (error) {
-          console.error('Error fetching clients:', error)
-          setLoading(false)
-          return
-        }
-
-        // Show all assigned clients: gym clients (Nutrition/Premium) + dietitian-added clients (no subscription)
-        if (assignments && assignments.length > 0) {
-          const validAssignments = assignments.filter((a: any) => a.client?.id)
-          const clientsWithSummaries = await Promise.all(
-            validAssignments.map(async (assignment: any) => {
-              // Get latest body composition
-              const { data: latestBody } = await supabase
-                .from('body_compositions')
-                .select('weight_kg, bmi')
-                .eq('client_id', assignment.client?.id)
-                .order('measurement_date', { ascending: false })
-                .limit(1)
-                .single()
-
-              // Get active diet plan
-              const { data: activePlan } = await supabase
-                .from('diet_plans')
-                .select('id, name, status')
-                .eq('client_id', assignment.client?.id)
-                .eq('status', 'active')
-                .limit(1)
-                .single()
-
-              return {
-                id: assignment.id,
-                client: assignment.client,
-                summary: {
-                  latestBodyComposition: latestBody,
-                  activeDietPlan: activePlan,
-                  weeklyCompliance: 0
-                }
-              }
-            })
-          )
-          setClients(clientsWithSummaries)
-        }
-      } catch (error) {
-        console.error('Error loading clients:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
 
     loadClients().then(async () => {
       const { data: { user } } = await supabase.auth.getUser()
@@ -134,7 +135,7 @@ export default function ClientsPage() {
     return () => {
       if (channel) supabase.removeChannel(channel)
     }
-  }, [])
+  }, [loadClients])
 
   const q = searchQuery.trim().toLowerCase()
   const filteredClients = clients.filter(c => 
@@ -146,25 +147,25 @@ export default function ClientsPage() {
   return (
     <div className="space-y-6">
       {/* Header - book cover style */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-700 via-amber-600 to-amber-700 p-8 text-amber-50 paper-stack">
-        <div className="absolute inset-0 bg-gradient-to-br from-amber-900/20 to-transparent" />
-        <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-amber-400/10 blur-3xl" />
-        
+      <div className="relative overflow-hidden rounded-lg glass-card p-8">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent-red/5" />
+        <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute -bottom-20 -left-20 h-60 w-60 rounded-full bg-accent-red/10 blur-3xl" />
         <div className="relative z-10 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="p-4 bg-amber-600/30 rounded-2xl border border-amber-500/30">
-              <Users className="w-10 h-10 text-amber-100" />
+            <div className="p-4 glass-subtle rounded-2xl border border-primary/30">
+              <Users01 className="w-10 h-10 text-primary" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold">My Clients</h1>
-              <p className="text-amber-100/90">Manage assigned gym clients and add new clients not in the gym</p>
+              <h1 className="font-display text-3xl font-bold text-white tracking-wide">My Clients</h1>
+              <p className="text-gray-400">Manage assigned gym clients and add new clients not in the gym</p>
             </div>
           </div>
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-amber-600/40 hover:bg-amber-600/50 rounded-xl font-medium text-amber-50 transition-colors border border-amber-500/30"
+            className="flex items-center gap-2 px-5 py-2.5 glass-button rounded-xl font-medium text-white"
           >
-            <UserPlus className="w-5 h-5" />
+            <UserPlus01 className="w-5 h-5" />
             Add New Client
           </button>
         </div>
@@ -172,13 +173,13 @@ export default function ClientsPage() {
 
       {/* Search */}
       <div className="relative max-w-md">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-muted" />
+        <SearchMd className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search clients by name or email..."
-          className="w-full pl-12 pr-4 py-3 bg-paper border border-amber-900/15 rounded-xl text-ink placeholder-ink-muted focus:outline-none focus:ring-2 focus:ring-primary/30"
+          className="w-full pl-12 pr-4 py-3 glass-input rounded-xl"
         />
       </div>
 
@@ -188,16 +189,16 @@ export default function ClientsPage() {
           <Loader2 className="w-10 h-10 animate-spin text-primary" />
         </div>
       ) : filteredClients.length === 0 ? (
-        <div className="page-card rounded-2xl p-16 text-center paper-stack">
-          <Users className="w-16 h-16 text-amber-300 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-ink mb-2">No clients found</h3>
-          <p className="text-ink-muted mb-6">
+        <div className="glass-card rounded-lg p-16 text-center">
+          <Users01 className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-white mb-2">No clients found</h3>
+          <p className="text-gray-400 mb-6">
             {searchQuery ? 'Try a different search term' : 'Add a new client or wait for admin to assign gym clients'}
           </p>
           {!searchQuery && (
             <button
               onClick={() => setShowAddModal(true)}
-              className="px-6 py-3 bg-primary text-amber-50 rounded-xl font-medium transition-colors hover:bg-primary-dark"
+              className="px-6 py-3 glass-button text-white rounded-xl font-medium"
             >
               Add New Client
             </button>
@@ -231,12 +232,12 @@ export default function ClientsPage() {
                       <p className="text-xs text-ink-muted">kg</p>
                     </div>
                     <div className="text-center">
-                      <Utensils className="w-5 h-5 text-primary mx-auto" />
+                      <Receipt className="w-5 h-5 text-primary mx-auto" />
                       <p className="text-sm font-semibold text-ink mt-1">{summary?.activeDietPlan ? 'Yes' : 'No'}</p>
                       <p className="text-xs text-ink-muted">Plan</p>
                     </div>
                     <div className="text-center">
-                      <TrendingUp className="w-5 h-5 text-primary mx-auto" />
+                      <Activity className="w-5 h-5 text-primary mx-auto" />
                       <p className="text-sm font-semibold text-ink mt-1">{summary?.weeklyCompliance || 0}%</p>
                       <p className="text-xs text-ink-muted">Compliance</p>
                     </div>
@@ -269,7 +270,7 @@ export default function ClientsPage() {
                   </div>
                 </div>
               }
-              className="card-hover paper-stack"
+              className="card-hover rounded-xl"
             />
           ))}
         </div>
@@ -339,7 +340,7 @@ function AddClientModal({ onClose, onSuccess }: { onClose: () => void; onSuccess
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-ink">Add New Client</h2>
             <button onClick={onClose} className="p-2 hover:bg-amber-900/10 rounded text-ink-muted hover:text-ink">
-              <X className="w-5 h-5" />
+              <XClose className="w-5 h-5" />
             </button>
           </div>
           <p className="text-ink-muted text-sm mt-1">For clients not in the gym (private nutrition)</p>

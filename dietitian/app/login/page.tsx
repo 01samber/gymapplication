@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { Loader2, BookOpen, Lock, Mail } from 'lucide-react'
@@ -12,6 +12,15 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [configError, setConfigError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    if (!url || !key || url.includes('your') || key.includes('your')) {
+      setConfigError('Supabase not configured. Copy admin/.env.local to dietitian/.env.local with the same NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY, then restart the dietitian server.')
+    }
+  }, [])
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
@@ -19,35 +28,69 @@ export default function LoginPage() {
     setError(null)
 
     try {
+      const normalizedEmail = email.trim().toLowerCase()
+      if (!normalizedEmail || !password) {
+        setError('Please enter email and password.')
+        return
+      }
+
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.toLowerCase(),
+        email: normalizedEmail,
         password,
       })
 
-      if (signInError) throw signInError
+      if (signInError) {
+        const msg = signInError.message?.toLowerCase() || ''
+        if (msg.includes('invalid') || msg.includes('credentials')) {
+          setError('Invalid email or password.')
+        } else if (msg.includes('email not confirmed')) {
+          setError('Please confirm your email before signing in.')
+        } else {
+          setError(signInError.message || 'Sign in failed.')
+        }
+        return
+      }
+
+      const userId = data?.user?.id
+      if (!userId) {
+        setError('Login failed. Please try again.')
+        return
+      }
 
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('role')
-        .eq('id', data.user?.id)
+        .eq('id', userId)
         .single()
 
-      if (profileError) throw profileError
-
-      if (profile.role !== 'dietitian' && profile.role !== 'admin') {
+      if (profileError) {
         await supabase.auth.signOut()
-        throw new Error('Access denied. This portal is for dietitians only.')
+        const code = profileError.code || ''
+        if (code === 'PGRST116' || profileError.message?.includes('0 rows')) {
+          setError('No profile found. Dietitians: ask admin to add you via Admin → Nutritionists. Admins: ensure your profile has role=admin in Supabase (Table Editor → profiles).')
+        } else {
+          setError(profileError.message || 'Could not load profile.')
+        }
+        return
+      }
+
+      const role = profile?.role
+      if (role !== 'dietitian' && role !== 'admin') {
+        await supabase.auth.signOut()
+        setError('Access denied. This portal is for dietitians and admins only.')
+        return
       }
 
       const needsPasswordChange = data.user?.user_metadata?.needs_password_change === true
       if (needsPasswordChange) {
-        router.push('/set-password')
+        window.location.href = '/set-password'
         return
       }
 
-      router.push('/dashboard')
+      // Full page redirect ensures dashboard picks up the new session
+      window.location.href = '/dashboard'
     } catch (err: any) {
-      setError(err.message)
+      setError(err?.message || 'An unexpected error occurred.')
     } finally {
       setLoading(false)
     }
@@ -117,7 +160,12 @@ export default function LoginPage() {
             <p className="text-ink-muted mt-2">Sign in to access your dashboard</p>
           </div>
 
-          {error && (
+          {configError && (
+            <div className="mb-6 p-4 bg-amber-100 border border-amber-200 rounded-xl text-amber-800 text-sm">
+              {configError}
+            </div>
+          )}
+          {error && !configError && (
             <div className="mb-6 p-4 bg-red-100 border border-red-200 rounded-xl text-red-700 text-sm">
               {error}
             </div>
@@ -156,7 +204,7 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !!configError}
               className="w-full py-3 bg-primary text-amber-50 rounded-xl font-semibold hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading ? (
@@ -171,7 +219,7 @@ export default function LoginPage() {
           </form>
 
           <p className="mt-8 text-center text-sm text-ink-muted">
-            Need access? Contact your administrator.
+            Use dietitian or admin credentials. Need access? Ask your admin to add you via Admin Dashboard → Nutritionists.
           </p>
         </div>
       </div>

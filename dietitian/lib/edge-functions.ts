@@ -544,7 +544,7 @@ export async function getMyClients(): Promise<{ data: ClientAssignment[] | null;
       .eq('is_active', true)
 
     if (error) throw error
-    return { data: data as ClientAssignment[], error: null }
+    return { data: data as unknown as ClientAssignment[], error: null }
   } catch (error: any) {
     return { data: null, error: error.message }
   }

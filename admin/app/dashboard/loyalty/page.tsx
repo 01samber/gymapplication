@@ -6,18 +6,16 @@ import {
   Loader2, 
   Gift,
   Award,
-  Star,
   CheckCircle,
-  Clock,
-  TrendingUp,
   User,
+  RefreshCw,
   Calendar
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 type LoyaltyMember = {
   id: string
-  user_id: string
+  client_id: string
   consecutive_months: number
   total_months: number
   free_pt_months_earned: number
@@ -25,7 +23,7 @@ type LoyaltyMember = {
   full_name?: string
 }
 
-type LoyaltyReward = {
+type ClientReward = {
   id: string
   client_id: string
   reward_type: string
@@ -39,9 +37,10 @@ type LoyaltyReward = {
 export default function LoyaltyPage() {
   const [loading, setLoading] = useState(true)
   const [members, setMembers] = useState<LoyaltyMember[]>([])
-  const [rewards, setRewards] = useState<LoyaltyReward[]>([])
+  const [rewards, setRewards] = useState<ClientReward[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [viewMode, setViewMode] = useState<'members' | 'rewards'>('members')
+  const [syncing, setSyncing] = useState(false)
 
   useEffect(() => {
     fetchLoyaltyData()
@@ -50,7 +49,7 @@ export default function LoyaltyPage() {
   async function fetchLoyaltyData() {
     setLoading(true)
     try {
-      // Fetch loyalty tracking
+      // loyalty_tracking.client_id = profiles.id (user id)
       const { data: loyaltyData, error: loyaltyError } = await supabase
         .from('loyalty_tracking')
         .select('*')
@@ -58,40 +57,28 @@ export default function LoyaltyPage() {
 
       if (loyaltyError) throw loyaltyError
 
-      // Fetch client profiles and names
       if (loyaltyData && loyaltyData.length > 0) {
         const clientIds = loyaltyData.map(l => l.client_id)
-        const { data: clientProfiles } = await supabase
-          .from('client_profiles')
-          .select('id, user_id')
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, full_name')
           .in('id', clientIds)
 
-        if (clientProfiles) {
-          const userIds = clientProfiles.map(cp => cp.user_id)
-          const { data: profiles } = await supabase
-            .from('profiles')
-            .select('id, full_name')
-            .in('id', userIds)
-
-          const membersWithNames = loyaltyData.map(l => {
-            const cp = clientProfiles.find(c => c.id === l.client_id)
-            const profile = profiles?.find(p => p.id === cp?.user_id)
-            return {
-              ...l,
-              user_id: cp?.user_id || '',
-              full_name: profile?.full_name || 'Unknown'
-            }
-          })
-
-          setMembers(membersWithNames)
-        }
+        const membersWithNames = loyaltyData.map(l => {
+          const profile = profiles?.find(p => p.id === l.client_id)
+          return {
+            ...l,
+            full_name: profile?.full_name || 'Unknown'
+          }
+        })
+        setMembers(membersWithNames)
       } else {
         setMembers([])
       }
 
-      // Fetch rewards
+      // Client-earned rewards (from client_loyalty_rewards)
       const { data: rewardsData, error: rewardsError } = await supabase
-        .from('loyalty_rewards')
+        .from('client_loyalty_rewards')
         .select('*')
         .order('created_at', { ascending: false })
 
@@ -99,29 +86,19 @@ export default function LoyaltyPage() {
 
       if (rewardsData && rewardsData.length > 0) {
         const clientIds = rewardsData.map(r => r.client_id)
-        const { data: clientProfiles } = await supabase
-          .from('client_profiles')
-          .select('id, user_id')
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, full_name')
           .in('id', clientIds)
 
-        if (clientProfiles) {
-          const userIds = clientProfiles.map(cp => cp.user_id)
-          const { data: profiles } = await supabase
-            .from('profiles')
-            .select('id, full_name')
-            .in('id', userIds)
-
-          const rewardsWithNames = rewardsData.map(r => {
-            const cp = clientProfiles.find(c => c.id === r.client_id)
-            const profile = profiles?.find(p => p.id === cp?.user_id)
-            return {
-              ...r,
-              client_name: profile?.full_name || 'Unknown'
-            }
-          })
-
-          setRewards(rewardsWithNames)
-        }
+        const rewardsWithNames = rewardsData.map(r => {
+          const profile = profiles?.find(p => p.id === r.client_id)
+          return {
+            ...r,
+            client_name: profile?.full_name || 'Unknown'
+          }
+        })
+        setRewards(rewardsWithNames)
       } else {
         setRewards([])
       }
@@ -132,15 +109,101 @@ export default function LoyaltyPage() {
     }
   }
 
-  async function claimReward(id: string) {
+  async function syncLoyaltyFromPayments() {
+    setSyncing(true)
     try {
+      const { data: subs } = await supabase.from('subscriptions').select('id, client_id, start_date, end_date')
+      if (!subs?.length) {
+        alert('No subscriptions found')
+        return
+      }
+
+      const { data: payments } = await supabase
+        .from('subscription_payments')
+        .select('subscription_id, paid_at')
+        .order('paid_at', { ascending: true })
+
+      const paymentsBySub = (payments || []).reduce((acc, p) => {
+        if (!acc[p.subscription_id]) acc[p.subscription_id] = []
+        acc[p.subscription_id].push(p)
+        return acc
+      }, {} as Record<string, { paid_at: string }[]>)
+
+      for (const sub of subs) {
+        const subPayments = paymentsBySub[sub.id] || []
+        const paidMonths = subPayments.length
+        const lastPayment = subPayments[paidMonths - 1]
+        const lastDate = lastPayment?.paid_at?.split('T')[0] ?? sub.end_date ?? null
+
+        const { data: existing } = await supabase
+          .from('loyalty_tracking')
+          .select('free_pt_months_used')
+          .eq('client_id', sub.client_id)
+          .single()
+
+        const used = existing?.free_pt_months_used ?? 0
+        const earned = Math.floor(paidMonths / 12)
+        const consec = paidMonths % 12
+
+        await supabase.from('loyalty_tracking').upsert({
+          client_id: sub.client_id,
+          consecutive_months: consec,
+          total_months: paidMonths,
+          last_subscription_date: lastDate,
+          current_streak_start: sub.start_date ?? lastDate,
+          free_pt_months_earned: earned,
+          free_pt_months_used: Math.min(used, earned),
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'client_id', ignoreDuplicates: false })
+      }
+
+      await fetchLoyaltyData()
+    } catch (error) {
+      console.error('Error syncing:', error)
+      alert('Sync failed')
+    } finally {
+      setSyncing(false)
+    }
+  }
+
+  async function claimReward(rewardId: string, applyFreeMonth: boolean) {
+    try {
+      const reward = rewards.find(r => r.id === rewardId)
+      if (!reward) return
+
+      if (applyFreeMonth) {
+        const { data: sub } = await supabase
+          .from('subscriptions')
+          .select('id, end_date')
+          .eq('client_id', reward.client_id)
+          .eq('status', 'active')
+          .single()
+
+        if (sub) {
+          const end = new Date(sub.end_date)
+          end.setMonth(end.getMonth() + 1)
+          await supabase.from('subscriptions').update({
+            end_date: end.toISOString().split('T')[0],
+            updated_at: new Date().toISOString()
+          }).eq('id', sub.id)
+
+          const { data: lt } = await supabase.from('loyalty_tracking').select('free_pt_months_used').eq('client_id', reward.client_id).single()
+          await supabase.from('loyalty_tracking').update({
+            free_pt_months_used: (lt?.free_pt_months_used ?? 0) + 1,
+            updated_at: new Date().toISOString()
+          }).eq('client_id', reward.client_id)
+        }
+      }
+
       await supabase
-        .from('loyalty_rewards')
+        .from('client_loyalty_rewards')
         .update({ is_claimed: true, claimed_at: new Date().toISOString() })
-        .eq('id', id)
+        .eq('id', rewardId)
+
       fetchLoyaltyData()
     } catch (error) {
       console.error('Error:', error)
+      alert('Failed to claim reward')
     }
   }
 
@@ -152,9 +215,10 @@ export default function LoyaltyPage() {
     !q || r.client_name?.toLowerCase().includes(q)
   )
 
+  const earned = members.reduce((sum, m) => sum + (m.free_pt_months_earned ?? 0), 0)
   const stats = {
     totalMembers: members.length,
-    totalRewardsEarned: members.reduce((sum, m) => sum + m.free_pt_months_earned, 0),
+    totalRewardsEarned: earned,
     pendingRewards: rewards.filter(r => !r.is_claimed).length,
     claimedRewards: rewards.filter(r => r.is_claimed).length
   }
@@ -166,45 +230,53 @@ export default function LoyaltyPage() {
 
   return (
     <div className="space-y-6">
-      {/* Hero Header - matches Subscriptions */}
+      {/* Hero Header - matches Subscriptions, Reports, etc */}
       <div className="relative overflow-hidden rounded-lg glass-card p-8">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent-red/5" />
         <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-primary/10 blur-3xl" />
         <div className="absolute -bottom-20 -left-20 h-60 w-60 rounded-full bg-accent-red/10 blur-3xl" />
         
-        <div className="relative z-10">
+        <div className="relative z-10 flex items-center justify-between flex-wrap gap-4">
           <div>
             <h1 className="font-display text-2xl font-bold text-white tracking-wide">Loyalty Program</h1>
-            <p className="text-gray-400">12 months = 1 FREE PT month</p>
+            <p className="text-gray-400 mt-1">12 months paid = 13th month FREE for all clients</p>
           </div>
+          <button
+            onClick={syncLoyaltyFromPayments}
+            disabled={syncing}
+            className="flex items-center gap-2 px-5 py-2.5 glass-button text-white rounded-lg font-medium disabled:opacity-50"
+          >
+            {syncing ? <Loader2 className="w-5 h-5 animate-spin" /> : <RefreshCw className="w-5 h-5" />}
+            Sync from payments
+          </button>
+        </div>
 
-          <div className="flex gap-6 mt-8">
-            <div className="flex items-center gap-3">
-              <div className="p-2 glass-subtle rounded-lg">
-                <User className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-white">{stats.totalMembers}</p>
-                <p className="text-xs text-gray-400">Members Tracked</p>
-              </div>
+        <div className="relative z-10 flex gap-6 mt-8">
+          <div className="flex items-center gap-3">
+            <div className="p-2 glass-subtle rounded-lg">
+              <User className="w-5 h-5 text-primary" />
             </div>
-            <div className="flex items-center gap-3">
-              <div className="p-2 glass-subtle rounded-lg">
-                <Award className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-white">{stats.totalRewardsEarned}</p>
-                <p className="text-xs text-gray-400">Total Rewards Earned</p>
-              </div>
+            <div>
+              <p className="text-2xl font-bold text-white">{stats.totalMembers}</p>
+              <p className="text-xs text-gray-400">Members Tracked</p>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="p-2 glass-subtle rounded-lg">
-                <Gift className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-white">{stats.pendingRewards}</p>
-                <p className="text-xs text-gray-400">Pending Claims</p>
-              </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="p-2 glass-subtle rounded-lg">
+              <Award className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-white">{stats.totalRewardsEarned}</p>
+              <p className="text-xs text-gray-400">Free Months Earned</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="p-2 glass-subtle rounded-lg">
+              <Gift className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-white">{stats.pendingRewards}</p>
+              <p className="text-xs text-gray-400">Pending Claim</p>
             </div>
           </div>
         </div>
@@ -254,58 +326,64 @@ export default function LoyaltyPage() {
       ) : viewMode === 'members' ? (
         filteredMembers.length === 0 ? (
           <div className="glass-card rounded-lg p-16 text-center">
-            <Gift className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <Gift className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-white mb-2">No loyalty data yet</h3>
-            <p className="text-gray-500">Members will be tracked as they maintain subscriptions</p>
+            <p className="text-gray-500 mb-4">Sync from payments or add renewals via Subscriptions. Each paid month counts toward the 12-month reward.</p>
+            <button
+              onClick={syncLoyaltyFromPayments}
+              disabled={syncing}
+              className="px-5 py-2.5 glass-button text-white rounded-lg font-medium"
+            >
+              Sync from payments
+            </button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredMembers.map((member) => (
-              <div key={member.id} className="glass-card rounded-lg shadow-sm hover:shadow-md transition-all overflow-hidden">
+              <div key={member.id} className="glass-card rounded-lg shadow-sm hover:shadow-md transition-all overflow-hidden border border-primary/20">
                 <div className="h-2 bg-gradient-to-r from-primary to-accent-red" />
                 
                 <div className="p-5">
                   <div className="flex items-center gap-4 mb-4">
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-accent-red flex items-center justify-center text-white text-xl font-bold">
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/30 to-accent-red/30 flex items-center justify-center text-white text-xl font-bold border border-primary/40">
                       {member.full_name?.charAt(0).toUpperCase()}
                     </div>
                     <div>
                       <h3 className="font-bold text-white">{member.full_name}</h3>
-                      <p className="text-sm text-gray-500">{member.total_months} total months</p>
+                      <p className="text-sm text-gray-500">{member.total_months ?? 0} total months</p>
                     </div>
                   </div>
 
-                  {/* Progress Bar */}
                   <div className="mb-4">
                     <div className="flex justify-between text-sm mb-2">
                       <span className="text-gray-500">Progress to next reward</span>
-                      <span className="font-medium text-amber-600">{member.consecutive_months % 12}/12 months</span>
+                      <span className="font-medium text-primary">{(member.consecutive_months ?? 0) % 12}/12 months</span>
                     </div>
                     <div className="h-3 bg-slate-700/50 rounded-full overflow-hidden">
                       <div 
                         className="h-full bg-gradient-to-r from-primary to-accent-red rounded-full transition-all duration-500"
-                        style={{ width: `${getProgressToNextReward(member.consecutive_months)}%` }}
+                        style={{ width: `${getProgressToNextReward(member.consecutive_months ?? 0)}%` }}
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div className="glass-subtle rounded-xl p-3 text-center">
-                      <p className="text-2xl font-bold text-primary">{member.consecutive_months}</p>
+                      <p className="text-2xl font-bold text-primary">{member.consecutive_months ?? 0}</p>
                       <p className="text-xs text-gray-400">Consecutive</p>
                     </div>
                     <div className="glass-subtle rounded-xl p-3 text-center">
-                      <p className="text-2xl font-bold text-white">{member.free_pt_months_earned}</p>
-                      <p className="text-xs text-gray-400">Rewards Earned</p>
+                      <p className="text-2xl font-bold text-white">{member.free_pt_months_earned ?? 0}</p>
+                      <p className="text-xs text-gray-400">Earned</p>
                     </div>
                   </div>
 
-                  {member.free_pt_months_earned > member.free_pt_months_used && (
+                  {(member.free_pt_months_earned ?? 0) > (member.free_pt_months_used ?? 0) && (
                     <div className="mt-4 p-3 glass-subtle rounded-xl border border-primary/30">
                       <div className="flex items-center gap-2 text-primary">
                         <Gift className="w-5 h-5" />
                         <span className="font-medium">
-                          {member.free_pt_months_earned - member.free_pt_months_used} reward(s) available!
+                          {(member.free_pt_months_earned ?? 0) - (member.free_pt_months_used ?? 0)} reward(s) available
                         </span>
                       </div>
                     </div>
@@ -318,16 +396,15 @@ export default function LoyaltyPage() {
       ) : (
         filteredRewards.length === 0 ? (
           <div className="glass-card rounded-lg p-16 text-center">
-            <Award className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <Award className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-white mb-2">No rewards yet</h3>
-            <p className="text-gray-500">Rewards will appear when members reach 12 consecutive months</p>
+            <p className="text-gray-500">Rewards appear when clients reach 12 consecutive paid months (renew via Subscriptions)</p>
           </div>
         ) : (
           <div className="space-y-3">
             {filteredRewards.map((reward) => (
-              <div key={reward.id} className="glass-card rounded-lg shadow-sm hover:shadow-md transition-all p-5">
-                <div className="flex items-center gap-4">
-                  {/* Icon */}
+              <div key={reward.id} className="glass-card rounded-lg shadow-sm hover:shadow-md transition-all p-5 border border-primary/20">
+                <div className="flex flex-wrap items-center gap-4">
                   <div className={`w-14 h-14 rounded-2xl flex items-center justify-center glass-subtle ${
                     reward.is_claimed ? 'text-primary' : 'text-primary'
                   }`}>
@@ -338,35 +415,38 @@ export default function LoyaltyPage() {
                     )}
                   </div>
 
-                  {/* Info */}
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-[200px]">
                     <h3 className="font-bold text-white">{reward.client_name}</h3>
                     <p className="text-sm text-gray-500">
-                      Earned 1 FREE PT month after {reward.months_count} months
+                      Earned 1 FREE month after {reward.months_count} paid months
                     </p>
                   </div>
 
-                  {/* Date */}
-                  <div className="text-right text-sm text-gray-500">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-4 h-4" />
-                      {new Date(reward.created_at).toLocaleDateString()}
-                    </div>
-                    {reward.claimed_at && (
-                      <p className="text-green-600 text-xs mt-1">
-                        Claimed {new Date(reward.claimed_at).toLocaleDateString()}
-                      </p>
-                    )}
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <Calendar className="w-4 h-4" />
+                    {new Date(reward.created_at).toLocaleDateString()}
                   </div>
+                  {reward.claimed_at && (
+                    <p className="text-primary text-xs">
+                      Claimed {new Date(reward.claimed_at).toLocaleDateString()}
+                    </p>
+                  )}
 
-                  {/* Action */}
                   {!reward.is_claimed ? (
-                    <button
-                      onClick={() => claimReward(reward.id)}
-                      className="px-4 py-2 glass-button text-white rounded font-medium flex items-center gap-2"
-                    >
-                      <CheckCircle className="w-4 h-4" /> Mark Claimed
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => claimReward(reward.id, true)}
+                        className="px-4 py-2 glass-button text-white rounded-lg font-medium flex items-center gap-2"
+                      >
+                        <CheckCircle className="w-4 h-4" /> Apply free month
+                      </button>
+                      <button
+                        onClick={() => claimReward(reward.id, false)}
+                        className="px-4 py-2 glass-subtle rounded-lg font-medium text-gray-400 hover:text-white"
+                      >
+                        Mark claimed
+                      </button>
+                    </div>
                   ) : (
                     <span className="px-4 py-2 glass-subtle text-primary rounded-xl text-sm font-medium">
                       Claimed

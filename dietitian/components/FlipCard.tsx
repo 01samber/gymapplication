@@ -18,10 +18,10 @@ export default function FlipCard({ front, back, className = '', flipOnHover = tr
       onClick={() => !flipOnHover && setFlipped(!flipped)}
     >
       <div className={`flip-card-inner ${flipped ? 'flipped' : ''}`}>
-        <div className="flip-card-front page-card p-6 h-full">
+        <div className="flip-card-front glass-card p-6 h-full rounded-xl">
           {front}
         </div>
-        <div className="flip-card-back page-card p-6 h-full">
+        <div className="flip-card-back glass-card p-6 h-full rounded-xl">
           {back}
         </div>
       </div>

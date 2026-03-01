@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/fitness_theme.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../providers/trainer_provider.dart';
 
-/// Trainer home/dashboard screen - real data from Supabase
+/// Trainer home - Pixel True Fitness UI style
 class TrainerHomeScreen extends ConsumerWidget {
   const TrainerHomeScreen({super.key});
 
@@ -19,21 +19,22 @@ class TrainerHomeScreen extends ConsumerWidget {
     final sessionCountsAsync = ref.watch(trainerSessionCountsProvider);
 
     return Scaffold(
+      backgroundColor: FitnessColors.black,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildHeader(context, userProfile),
               const SizedBox(height: 24),
 
-              _buildSectionTitle(context, "Today's Schedule"),
+              _sectionTitle(context, "Today's Schedule"),
               const SizedBox(height: 12),
               _buildTodaySchedule(context, scheduleAsync),
               const SizedBox(height: 24),
 
-              _buildSectionTitle(context, 'This Week'),
+              _sectionTitle(context, 'This Week'),
               const SizedBox(height: 12),
               _buildWeekStats(
                 context,
@@ -44,7 +45,7 @@ class TrainerHomeScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 24),
 
-              _buildSectionTitle(context, 'My Clients'),
+              _sectionTitle(context, 'My Clients'),
               const SizedBox(height: 12),
               _buildClientUpdates(context, clientsAsync, sessionCountsAsync),
               const SizedBox(height: 40),
@@ -57,7 +58,7 @@ class TrainerHomeScreen extends ConsumerWidget {
 
   Widget _buildHeader(BuildContext context, AsyncValue userProfile) {
     final name = userProfile.whenOrNull(
-          data: (profile) => profile?.fullName.split(' ').first ?? 'Coach',
+          data: (p) => p?.fullName.split(' ').first ?? 'Coach',
         ) ??
         'Coach';
 
@@ -69,54 +70,55 @@ class TrainerHomeScreen extends ConsumerWidget {
           children: [
             Text(
               'Welcome back,',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppColors.textSecondary,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: FitnessColors.gray,
                   ),
             ),
             Text(
               'Coach $name',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
+                    color: FitnessColors.white,
                   ),
             ),
           ],
         ),
-        Stack(
-          children: [
-            IconButton(
-              icon: const Icon(Icons.notifications_outlined),
-              iconSize: 28,
-              onPressed: () {},
-            ),
-            Positioned(
-              right: 8,
-              top: 8,
-              child: Container(
-                width: 8,
-                height: 8,
-                decoration: const BoxDecoration(
-                  color: AppColors.error,
-                  shape: BoxShape.circle,
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: FitnessColors.blackCard,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              const Icon(Icons.notifications_outlined, color: FitnessColors.gray, size: 24),
+              Positioned(
+                right: 0,
+                top: 0,
+                child: Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: FitnessColors.secondaryColor1,
+                    shape: BoxShape.circle,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildSectionTitle(BuildContext context, String title) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-      ],
+  Widget _sectionTitle(BuildContext context, String title) {
+    return Text(
+      title,
+      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: FitnessColors.white,
+          ),
     );
   }
 
@@ -127,17 +129,15 @@ class TrainerHomeScreen extends ConsumerWidget {
     return scheduleAsync.when(
       data: (sessions) {
         if (sessions.isEmpty) {
-          return _glassCard(
+          return _card(
             context,
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Center(
-                child: Text(
-                  'No sessions today',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                ),
+            padding: const EdgeInsets.all(28),
+            child: Center(
+              child: Text(
+                'No sessions today',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: FitnessColors.gray,
+                    ),
               ),
             ),
           );
@@ -147,70 +147,64 @@ class TrainerHomeScreen extends ConsumerWidget {
             final time = session['start_time']?.toString() ?? '--:--';
             final client = session['client_name'] ?? 'Client';
             final type = session['session_type'] ?? 'Session';
-            return Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              child: _glassCard(
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _card(
                 context,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 4,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 4,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        gradient: FitnessColors.primaryGradient,
+                        borderRadius: BorderRadius.circular(2),
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              client,
-                              style:
-                                  Theme.of(context).textTheme.titleMedium?.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '$time • ${type.toString().replaceAll('_', ' ')}',
-                              style:
-                                  Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                        color: AppColors.textSecondary,
-                                      ),
-                            ),
-                          ],
-                        ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            client,
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: FitnessColors.white,
+                                ),
+                          ),
+                          Text(
+                            '$time • ${type.toString().replaceAll('_', ' ')}',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: FitnessColors.gray,
+                                ),
+                          ),
+                        ],
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.chevron_right),
-                        onPressed: () {},
-                      ),
-                    ],
-                  ),
+                    ),
+                    Icon(Icons.chevron_right, color: FitnessColors.gray, size: 22),
+                  ],
                 ),
               ),
             );
           }).toList(),
         );
       },
-      loading: () => _glassCard(
+      loading: () => _card(
         context,
-        child: const Padding(
-          padding: EdgeInsets.all(32),
-          child: Center(child: CircularProgressIndicator()),
+        padding: const EdgeInsets.all(36),
+        child: Center(
+          child: CircularProgressIndicator(
+            color: FitnessColors.primaryColor1,
+            strokeWidth: 2,
+          ),
         ),
       ),
-      error: (_, __) => _glassCard(
+      error: (_, __) => _card(
         context,
-        child: const Padding(
-          padding: EdgeInsets.all(24),
-          child: Center(child: Text('Failed to load schedule')),
-        ),
+        padding: const EdgeInsets.all(24),
+        child: Center(child: Text('Failed to load', style: TextStyle(color: FitnessColors.gray))),
       ),
     );
   }
@@ -223,8 +217,7 @@ class TrainerHomeScreen extends ConsumerWidget {
     AsyncValue<int> timeSpentAsync,
   ) {
     final clientCount = clientsAsync.valueOrNull?.length ?? 0;
-    final sessionCount =
-        sessionCountsAsync.valueOrNull?.values.fold<int>(0, (a, b) => a + b) ?? 0;
+    final sessionCount = sessionCountsAsync.valueOrNull?.values.fold<int>(0, (a, b) => a + b) ?? 0;
     final revenue = revenueAsync.valueOrNull ?? 0;
     final minutes = timeSpentAsync.valueOrNull ?? 0;
     final hours = (minutes / 60).toStringAsFixed(1);
@@ -233,85 +226,54 @@ class TrainerHomeScreen extends ConsumerWidget {
       children: [
         Row(
           children: [
-            Expanded(
-              child: _buildStatCard(
-                context,
-                icon: Icons.event,
-                value: '$sessionCount',
-                label: 'Sessions',
-                color: AppColors.primary,
-              ),
-            ),
+            Expanded(child: _statCard(context, Icons.event, '$sessionCount', 'Sessions')),
             const SizedBox(width: 12),
-            Expanded(
-              child: _buildStatCard(
-                context,
-                icon: Icons.people,
-                value: '$clientCount',
-                label: 'Clients',
-                color: AppColors.secondary,
-              ),
-            ),
+            Expanded(child: _statCard(context, Icons.people, '$clientCount', 'Clients')),
           ],
         ),
         const SizedBox(height: 12),
         Row(
           children: [
-            Expanded(
-              child: _buildStatCard(
-                context,
-                icon: Icons.timer,
-                value: '${hours}h',
-                label: 'Time Spent',
-                color: AppColors.success,
-              ),
-            ),
+            Expanded(child: _statCard(context, Icons.timer, '${hours}h', 'Time Spent')),
             const SizedBox(width: 12),
-            Expanded(
-              child: _buildStatCard(
-                context,
-                icon: Icons.attach_money,
-                value: '\$${revenue.toStringAsFixed(0)}',
-                label: 'Revenue',
-                color: AppColors.warning,
-              ),
-            ),
+            Expanded(child: _statCard(context, Icons.attach_money, '\$${revenue.toStringAsFixed(0)}', 'Revenue')),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildStatCard(
-    BuildContext context, {
-    required IconData icon,
-    required String value,
-    required String label,
-    required Color color,
-  }) {
-    return _glassCard(
+  Widget _statCard(BuildContext context, IconData icon, String value, String label) {
+    return _card(
       context,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 24),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                  ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              gradient: FitnessColors.primaryGradient,
+              borderRadius: BorderRadius.circular(10),
             ),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: color.withOpacity(0.8),
-                  ),
-            ),
-          ],
-        ),
+            child: Icon(icon, color: FitnessColors.white, size: 20),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: FitnessColors.white,
+                ),
+          ),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: FitnessColors.gray,
+                  fontSize: 11,
+                ),
+          ),
+        ],
       ),
     );
   }
@@ -325,11 +287,16 @@ class TrainerHomeScreen extends ConsumerWidget {
       data: (clients) {
         final counts = sessionCountsAsync.valueOrNull ?? {};
         if (clients.isEmpty) {
-          return _glassCard(
+          return _card(
             context,
-            child: const Padding(
-              padding: EdgeInsets.all(24),
-              child: Center(child: Text('No clients assigned yet')),
+            padding: const EdgeInsets.all(24),
+            child: Center(
+              child: Text(
+                'No clients assigned yet',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: FitnessColors.gray,
+                    ),
+              ),
             ),
           );
         }
@@ -337,83 +304,83 @@ class TrainerHomeScreen extends ConsumerWidget {
           children: clients.take(5).map((client) {
             final cid = client['user_id']?.toString() ?? '';
             final sessions = counts[cid] ?? 0;
-            return Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              child: _glassCard(
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _card(
                 context,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 20,
-                        backgroundColor: AppColors.secondary.withOpacity(0.2),
-                        child: Text(
-                          _getInitials(client['full_name'] ?? '?'),
-                          style: const TextStyle(
-                            color: AppColors.secondary,
-                            fontWeight: FontWeight.bold,
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 22,
+                      backgroundColor: FitnessColors.primaryColor1.withOpacity(0.2),
+                      child: Text(
+                        _getInitials(client['full_name'] ?? '?'),
+                        style: const TextStyle(
+                          color: FitnessColors.green,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            client['full_name'] ?? 'Client',
+                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: FitnessColors.white,
+                                ),
                           ),
-                        ),
+                          Text(
+                            '${_goalLabel(client['fitness_goal'])} • $sessions sessions',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: FitnessColors.gray,
+                                ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              client['full_name'] ?? 'Client',
-                              style:
-                                  Theme.of(context).textTheme.titleSmall?.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                            ),
-                            Text(
-                              '${_goalLabel(client['fitness_goal'])} • $sessions sessions',
-                              style:
-                                  Theme.of(context).textTheme.bodySmall?.copyWith(
-                                        color: AppColors.textSecondary,
-                                      ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Icon(
-                        Icons.chevron_right,
-                        color: AppColors.textHint,
-                        size: 20,
-                      ),
-                    ],
-                  ),
+                    ),
+                    Icon(Icons.chevron_right, color: FitnessColors.gray, size: 22),
+                  ],
                 ),
               ),
             );
           }).toList(),
         );
       },
-      loading: () => _glassCard(
+      loading: () => _card(
         context,
-        child: const Padding(
-          padding: EdgeInsets.all(32),
-          child: Center(child: CircularProgressIndicator()),
+        padding: const EdgeInsets.all(36),
+        child: Center(
+          child: CircularProgressIndicator(color: FitnessColors.primaryColor1, strokeWidth: 2),
         ),
       ),
-      error: (_, __) => _glassCard(
+      error: (_, __) => _card(
         context,
-        child: const Padding(
-          padding: EdgeInsets.all(24),
-          child: Center(child: Text('Failed to load clients')),
-        ),
+        padding: const EdgeInsets.all(24),
+        child: Center(child: Text('Failed to load', style: TextStyle(color: FitnessColors.gray))),
       ),
     );
   }
 
-  Widget _glassCard(BuildContext context, {required Widget child}) {
+  Widget _card(BuildContext context, {required EdgeInsets padding, required Widget child}) {
     return Container(
+      padding: padding,
       decoration: BoxDecoration(
-        color: AppColors.surface.withOpacity(0.4),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.cardBorder.withOpacity(0.5)),
+        color: FitnessColors.blackCard,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: FitnessColors.green.withOpacity(0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: FitnessColors.green.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: child,
     );
@@ -421,9 +388,7 @@ class TrainerHomeScreen extends ConsumerWidget {
 
   String _getInitials(String name) {
     final names = name.split(' ');
-    if (names.length >= 2) {
-      return '${names.first[0]}${names.last[0]}'.toUpperCase();
-    }
+    if (names.length >= 2) return '${names.first[0]}${names.last[0]}'.toUpperCase();
     return name.isNotEmpty ? name[0].toUpperCase() : '?';
   }
 
